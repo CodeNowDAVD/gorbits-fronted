@@ -15,6 +15,10 @@ if [[ ! -f sonar-project.properties ]]; then
   exit 1
 fi
 
+echo "==> Tests + cobertura"
+"${SCRIPT_DIR}/run-tests.sh"
+
+echo ""
 echo "==> Sonar → ${SONAR_HOST_URL} (proyecto GOrbitSF)"
 npx --yes sonar-scanner \
   -Dsonar.host.url="${SONAR_HOST_URL}" \

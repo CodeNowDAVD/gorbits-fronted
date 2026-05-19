@@ -1,13 +1,12 @@
 /**
  * Pipeline CI/CD — GOrbitSF (Frontend).
- * Mismo flujo que PSD-DMP (docente): Clone → Install → Sonar → Build → Deploy.
- * Deploy: Termux + Nginx (no Tomcat WAR).
+ * Clone → Install → Test (cobertura) → Sonar → Build → Deploy Termux.
  */
 pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS 22'   // mismo nombre que en Manage Jenkins → Tools
+        nodejs 'NodeJS 22'
     }
 
     parameters {
@@ -20,7 +19,6 @@ pipeline {
 
     environment {
         GITHUB_TOKEN   = credentials('github-token')
-        SONAR_TOKEN    = credentials('Sonarqube')
         SONAR_HOST_URL = 'http://sonarqube:9000'
         GIT_REPO_URL   = "${env.GIT_REPO_URL ?: 'https://github.com/CodeNowDAVD/gorbits-fronted.git'}"
         DIST_DIR       = 'dist/gorbitsf/browser'
@@ -48,19 +46,22 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    sh 'npm run test:ci'
+                }
+            }
+        }
+
         stage('Sonar') {
             steps {
                 timeout(time: 15, unit: 'MINUTES') {
                     withSonarQubeEnv('sonarqube') {
-                        sh """
+                        sh '''
                             npx sonar-scanner \
-                                -Dsonar.projectKey=GOrbitSF \
-                                -Dsonar.projectName=GOrbitSF \
-                                -Dsonar.sources=src \
-                                -Dsonar.exclusions=**/node_modules/**,**/*.spec.ts \
-                                -Dsonar.token=${SONAR_TOKEN} \
-                                -Dsonar.host.url=${SONAR_HOST_URL}
-                        """
+                                -Dsonar.host.url=http://sonarqube:9000
+                        '''
                     }
                 }
             }
@@ -106,10 +107,10 @@ pipeline {
             }
         }
         failure {
-            echo 'Revisar npm, Sonar, build o deploy SSH.'
+            echo 'Revisar npm, tests, Sonar, build o deploy SSH.'
         }
         always {
-            archiveArtifacts artifacts: 'dist/gorbitsf/browser/**',
+            archiveArtifacts artifacts: 'dist/gorbitsf/browser/**,coverage/gorbitsf/**',
                               allowEmptyArchive: true
         }
     }
