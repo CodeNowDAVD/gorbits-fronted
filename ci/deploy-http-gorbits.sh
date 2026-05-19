@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Deploy GOrbitSF → servidor vía HTTP (mismo patrón que GOrbitS backend).
-# POST multipart + Bearer token → https://app.gorbits.xyz/deploy
+# Deploy GOrbitSF → POST https://app.gorbits.xyz/deploy-frontend
+# Bearer token (Jenkins: credencial gorbits-deploy-token).
+#
+# Flujo servidor: Cloudflare → Nginx :8088 → deploy-receiver :9090
+#                  → ~/servers/gorbits-frontend/bin/deploy.sh → current/
 #
 # Uso:
 #   ./ci/build-production.sh
@@ -13,13 +16,13 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FRONTEND_DIR="${FRONTEND_DIR:-${SCRIPT_DIR}/..}"
 DIST_DIR="${DIST_DIR:-${FRONTEND_DIR}/dist/gorbitsf/browser}"
 
-DEPLOY_URL="${DEPLOY_URL:-https://app.gorbits.xyz/deploy}"
-HEALTH_URL="${HEALTH_URL:-https://app.gorbits.xyz/api/actuator/health}"
+DEPLOY_URL="${DEPLOY_URL:-https://app.gorbits.xyz/deploy-frontend}"
 FRONTEND_URL="${FRONTEND_URL:-https://app.gorbits.xyz}"
-TAR_FILE="${TAR_FILE:-/tmp/gorbitsf-frontend.tar.gz}"
+HEALTH_URL="${HEALTH_URL:-https://app.gorbits.xyz/api/actuator/health}"
+TAR_FILE="${TAR_FILE:-${FRONTEND_DIR}/frontend-new.tar.gz}"
 
 if [[ -z "${DEPLOY_TOKEN:-}" ]]; then
-  echo "ERROR: define DEPLOY_TOKEN o usa credencial Jenkins gorbits-deploy-token" >&2
+  echo "ERROR: define DEPLOY_TOKEN o credencial Jenkins gorbits-deploy-token" >&2
   exit 1
 fi
 
@@ -29,18 +32,19 @@ if [[ ! -f "${DIST_DIR}/index.html" ]]; then
 fi
 
 echo "======================================"
-echo " DEPLOY HTTP → GOrbitSF"
+echo " DEPLOY HTTP → GOrbitSF (frontend)"
 echo "======================================"
 echo "URL:  ${DEPLOY_URL}"
-echo "From: ${DIST_DIR}"
+echo "Tar:  ${TAR_FILE}"
+echo "From: ${DIST_DIR}/"
 echo ""
 
-echo "==> Empaquetar estáticos"
+echo "==> 1/3 Empaquetar (solo dist/gorbitsf/browser)"
 tar -czf "${TAR_FILE}" -C "${DIST_DIR}" .
 ls -lh "${TAR_FILE}"
 
 echo ""
-echo "==> POST (curl)"
+echo "==> 2/3 POST multipart (file=@frontend-new.tar.gz)"
 RESP=$(curl -sf -S -X POST \
   -H "Authorization: Bearer ${DEPLOY_TOKEN}" \
   -F "file=@${TAR_FILE}" \
@@ -53,20 +57,22 @@ echo "${RESP}"
 echo ""
 
 if ! echo "${RESP}" | grep -qE 'Deploy OK|Deploy exitoso|✅|success'; then
-  echo "AVISO: respuesta sin mensaje de éxito claro; verificar en servidor" >&2
+  echo "AVISO: revisar respuesta del deploy-receiver en servidor" >&2
 fi
 
-echo "==> Health API"
-HEALTH=$(curl -sf "${HEALTH_URL}" || true)
-echo "${HEALTH}"
+echo "==> 3/3 Validación"
+echo "--- SPA ${FRONTEND_URL}/ ---"
+curl -si "${FRONTEND_URL}/" | head -20
 
 echo ""
-echo "==> Frontend SPA"
-HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${FRONTEND_URL}/" || echo "000")
-echo "HTTP ${HTTP_CODE} ← ${FRONTEND_URL}/"
+echo "--- Health ${HEALTH_URL} ---"
+curl -sf "${HEALTH_URL}" || true
+echo ""
 
-if echo "${HEALTH}" | grep -q '"status":"UP"' && [[ "${HTTP_CODE}" == "200" ]]; then
-  echo "Deploy HTTP frontend OK."
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${FRONTEND_URL}/" || echo "000")
+if [[ "${HTTP_CODE}" == "200" ]]; then
+  echo "Deploy frontend HTTP OK (HTTP ${HTTP_CODE})."
 else
-  echo "AVISO: revisar ${FRONTEND_URL} y ${HEALTH_URL}"
+  echo "AVISO: ${FRONTEND_URL}/ respondió HTTP ${HTTP_CODE}" >&2
+  exit 1
 fi

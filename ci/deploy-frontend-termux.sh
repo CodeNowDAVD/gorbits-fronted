@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Deploy GOrbitSF → Termux (tar + scp + deploy.sh).
+# Deploy GOrbitSF → Termux LAN (tar + scp + ssh). OPCIONAL.
+# Flujo principal CI/CD: ./ci/deploy-http-gorbits.sh → POST /deploy-frontend
 # Ver: ../ENTREGA_FRONTEND.md y ../../comandos_despliegue_gorbits.txt
 #
 # Uso:

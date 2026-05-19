@@ -12,7 +12,7 @@
 | Fase | Qué hace | Herramienta |
 |------|----------|-------------|
 | **CI** | Compilar el SPA de producción | `npm ci` + `npm run build` |
-| **CD** | Publicar estáticos en el servidor | `tar` → `scp` → `deploy.sh` (Termux) |
+| **CD** | Publicar estáticos vía HTTP | `tar` → `POST /deploy-frontend` (Bearer) |
 | **Runtime** | Nginx sirve `/`, proxy `/api/` al backend | Puerto **8088** |
 
 **Diferencia con el backend (GOrbitS):**
@@ -21,7 +21,7 @@
 |---|---------|----------|
 | Artefacto | JAR | Carpeta `dist/gorbitsf/browser/` |
 | Build | Maven | npm / Angular |
-| Deploy | `POST https://app.gorbits.xyz/deploy` | SSH + `gorbits-frontend/bin/deploy.sh` |
+| Deploy | `POST https://app.gorbits.xyz/deploy` (JAR) | `POST https://app.gorbits.xyz/deploy-frontend` (tar.gz) |
 | Tests en pipeline | JUnit + JaCoCo (obligatorio en curso) | Opcional (`npm test`); este manual usa **build + deploy** |
 
 ---
@@ -152,37 +152,48 @@ grep -r 'localhost\|:8080' dist/gorbitsf/browser/*.js || echo 'OK: sin hosts de 
 
 ---
 
-## 4. CD — Despliegue continuo (Termux)
+## 4. CD — Despliegue continuo (HTTP)
 
 ### 4.1 Precondición
 
 Build reciente en `dist/gorbitsf/browser/` (paso 3).
 
-### 4.2 Deploy automatizado
+### 4.2 Endpoint
 
-```bash
-./ci/deploy-frontend-termux.sh
+```http
+POST https://app.gorbits.xyz/deploy-frontend
+Authorization: Bearer <DEPLOY_TOKEN>
+Content-Type: multipart/form-data
+file=@frontend-new.tar.gz
 ```
 
-**Pasos internos del script:**
+El servidor ejecuta internamente `~/servers/gorbits-frontend/bin/deploy.sh` (no se toca Nginx ni scripts desde Jenkins).
 
-1. `tar -czf /tmp/frontend-new.tar.gz` desde `dist/gorbitsf/browser/`  
-2. `scp` al servidor → `~/servers/gorbits-frontend/releases/frontend-new.tar.gz`  
-3. `ssh` ejecuta `~/servers/gorbits-frontend/bin/deploy.sh`  
-4. Publica en `~/servers/gorbits-frontend/current/`  
-5. Nginx sirve la nueva versión en `/`
-
-> **[CAPTURA 8]** Terminal: mensaje del `tar` y tamaño del archivo.  
-> **[CAPTURA 9]** Terminal: `scp` completado.  
-> **[CAPTURA 10]** Terminal: salida de `deploy.sh` en el servidor.
-
-### 4.3 Comando manual (referencia — una línea)
+### 4.3 Deploy automatizado
 
 ```bash
-tar -czf /tmp/frontend-new.tar.gz -C ~/Programacion/despliegueS/GOrbitSF/dist/gorbitsf/browser . && \
-scp -P 8022 /tmp/frontend-new.tar.gz u0_a296@192.168.2.4:~/servers/gorbits-frontend/releases/frontend-new.tar.gz && \
-ssh -p 8022 u0_a296@192.168.2.4 '~/servers/gorbits-frontend/bin/deploy.sh ~/servers/gorbits-frontend/releases/frontend-new.tar.gz'
+export DEPLOY_TOKEN="tu_token"
+./ci/deploy-http-gorbits.sh
 ```
+
+O manual:
+
+```bash
+tar -czf frontend-new.tar.gz -C dist/gorbitsf/browser .
+curl -X POST \
+  -H "Authorization: Bearer $DEPLOY_TOKEN" \
+  -F "file=@frontend-new.tar.gz" \
+  https://app.gorbits.xyz/deploy-frontend
+curl -i https://app.gorbits.xyz/
+```
+
+> **[CAPTURA 8]** Terminal: `tar` + `curl` POST OK.  
+> **[CAPTURA 9]** `curl -i https://app.gorbits.xyz/` → HTTP 200.  
+> **[CAPTURA 10]** Jenkins stage Deploy Frontend en verde.
+
+### 4.4 Deploy local Termux (opcional, red LAN)
+
+Solo si trabajas contra `192.168.2.4` sin Cloudflare: `./ci/deploy-frontend-termux.sh`
 
 ---
 

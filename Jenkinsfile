@@ -11,7 +11,7 @@ pipeline {
 
     parameters {
         booleanParam(name: 'DEPLOY_TO_SERVER', defaultValue: false,
-            description: 'Si true, POST tar.gz a https://app.gorbits.xyz/deploy (Bearer)')
+            description: 'Si true, POST frontend-new.tar.gz a /deploy-frontend (Bearer)')
     }
 
     environment {
@@ -19,7 +19,7 @@ pipeline {
         SONAR_HOST_URL = 'http://sonarqube:9000'
         GIT_REPO_URL   = "${env.GIT_REPO_URL ?: 'https://github.com/CodeNowDAVD/gorbits-fronted.git'}"
         DIST_DIR       = 'dist/gorbitsf/browser'
-        DEPLOY_URL     = 'https://app.gorbits.xyz/deploy'
+        DEPLOY_URL     = 'https://app.gorbits.xyz/deploy-frontend'
         FRONTEND_URL   = 'https://app.gorbits.xyz'
         HEALTH_URL     = 'https://app.gorbits.xyz/api/actuator/health'
     }
@@ -86,8 +86,12 @@ pipeline {
                         credentialsId: 'gorbits-deploy-token',
                         variable: 'DEPLOY_TOKEN')]) {
                         sh '''
-                            chmod +x ci/deploy-http-gorbits.sh
-                            ./ci/deploy-http-gorbits.sh
+                            tar -czf frontend-new.tar.gz -C dist/gorbitsf/browser .
+                            curl -sf -S -X POST \
+                              -H "Authorization: Bearer $DEPLOY_TOKEN" \
+                              -F "file=@frontend-new.tar.gz" \
+                              "$DEPLOY_URL"
+                            curl -sf -o /dev/null -w "Frontend HTTP %{http_code}\\n" "$FRONTEND_URL/"
                         '''
                     }
                 }
@@ -106,7 +110,7 @@ pipeline {
             }
         }
         failure {
-            echo 'Revisar npm, tests, Sonar, build o deploy HTTP (/deploy).'
+            echo 'Revisar npm, tests, Sonar, build o deploy HTTP (/deploy-frontend).'
         }
         always {
             archiveArtifacts artifacts: 'dist/gorbitsf/browser/**,coverage/gorbitsf/**',
