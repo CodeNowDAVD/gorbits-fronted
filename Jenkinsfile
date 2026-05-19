@@ -86,7 +86,11 @@ pipeline {
                         credentialsId: 'gorbits-deploy-token',
                         variable: 'DEPLOY_TOKEN')]) {
                         sh '''
-                            set -e
+                            set -eux
+                            test -f dist/gorbitsf/browser/index.html
+                            export DEPLOY_URL="${DEPLOY_URL}"
+                            export FRONTEND_URL="${FRONTEND_URL}"
+                            export HEALTH_URL="${HEALTH_URL}"
                             chmod +x ci/deploy-http-gorbits.sh
                             ./ci/deploy-http-gorbits.sh
                         '''
