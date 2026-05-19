@@ -2,6 +2,8 @@
 
 # Compiled output
 /dist
+/release
+*.tar.gz
 /tmp
 /out-tsc
 /bazel-out
