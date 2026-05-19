@@ -86,12 +86,9 @@ pipeline {
                         credentialsId: 'gorbits-deploy-token',
                         variable: 'DEPLOY_TOKEN')]) {
                         sh '''
-                            tar -czf frontend-new.tar.gz -C dist/gorbitsf/browser .
-                            curl -sf -S -X POST \
-                              -H "Authorization: Bearer $DEPLOY_TOKEN" \
-                              -F "file=@frontend-new.tar.gz" \
-                              "$DEPLOY_URL"
-                            curl -sf -o /dev/null -w "Frontend HTTP %{http_code}\\n" "$FRONTEND_URL/"
+                            set -e
+                            chmod +x ci/deploy-http-gorbits.sh
+                            ./ci/deploy-http-gorbits.sh
                         '''
                     }
                 }
