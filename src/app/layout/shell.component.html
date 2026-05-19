@@ -1,0 +1,30 @@
+<div class="shell" [class.shell-proveedor]="proveedorLayout()" [class.shell-admin]="adminLayout()">
+  <header class="top">
+    <a [routerLink]="homeLink()" class="brand">GOrbitS</a>
+    <nav class="nav">
+      @if (auth.session()?.role === 'PROVEEDOR') {
+        <a
+          routerLink="/proveedor"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          >Inicio</a
+        >
+        <a routerLink="/proveedor/catalogo" routerLinkActive="active">Catálogo</a>
+      } @else if (auth.session()?.role === 'ADMIN') {
+        <a routerLink="/admin/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: false }"
+          >Administración</a
+        >
+      } @else {
+        <a routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Inicio</a>
+      }
+    </nav>
+    @if (auth.session(); as u) {
+      <span class="who">{{ u.username }}</span>
+    }
+    <button type="button" class="ghost" (click)="auth.logout()">Cerrar sesión</button>
+  </header>
+
+  <main class="main">
+    <router-outlet />
+  </main>
+</div>

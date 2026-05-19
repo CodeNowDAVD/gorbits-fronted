@@ -1,0 +1,86 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="campo" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--campo">Trabajo · Campo</span>
+      <h1>Clientes</h1>
+      <p class="focus-page-subtitle">Altas, edición y contacto de tus clientes.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else {
+    <section class="focus-table-panel">
+      <div class="focus-table-toolbar">
+        <label class="focus-field focus-table-toolbar__search">
+          <span class="focus-field-label">Buscar</span>
+          <input
+            type="search"
+            class="focus-search-input"
+            [value]="searchQuery()"
+            (input)="onSearchInput($any($event.target).value)"
+            placeholder="Nombre del cliente…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </label>
+        @if (clients().length > 0 || searchQuery().trim()) {
+          <p class="focus-table-toolbar__meta">
+            @if (searching()) {
+              Buscando…
+            } @else {
+              {{ clients().length }} cliente{{ clients().length === 1 ? '' : 's' }}
+            }
+          </p>
+        }
+        <div class="focus-table-toolbar__actions">
+          <a routerLink="/proveedor/clientes/nuevo" class="btn-primary focus-form-actions-btn">Nuevo cliente</a>
+        </div>
+      </div>
+
+      @if (clients().length === 0) {
+        @if (searchQuery().trim()) {
+          <p class="focus-table-empty">Ningún cliente coincide con «{{ searchQuery().trim() }}».</p>
+        } @else {
+          <p class="focus-table-empty">No hay clientes aún. Crea el primero con el botón de arriba.</p>
+        }
+      } @else {
+        <div class="table-scroll focus-table-scroll" [class.focus-table-scroll--loading]="searching()">
+          <table class="data-table data-table--clients">
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Teléfono</th>
+                <th scope="col">Email</th>
+                <th scope="col" class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of clients(); track c.id) {
+                <tr>
+                  <td>{{ c.fullName }}</td>
+                  <td>{{ c.phone ?? '—' }}</td>
+                  <td>{{ c.email ?? '—' }}</td>
+                  <td class="col-act">
+                    <a [routerLink]="['/proveedor/clientes', c.id]" class="focus-table-link">Editar</a>
+                    <button
+                      type="button"
+                      class="focus-table-link focus-table-link--danger"
+                      (click)="deleteClient(c.id, c.fullName)"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

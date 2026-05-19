@@ -1,0 +1,54 @@
+<div class="focus-page focus-page--form focus-page--modo-section">
+  <app-provider-modo-nav mode="campo" backLink="/proveedor/clientes" backLabel="← Clientes" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--campo">Campo</span>
+      <h1>{{ isEdit() ? 'Editar cliente' : 'Nuevo cliente' }}</h1>
+      <p class="focus-page-subtitle">Datos de contacto y ubicación para contratos de venta.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (loadError(); as le) {
+    <p class="focus-table-message err">{{ le }}</p>
+  } @else {
+    <form class="focus-form" [formGroup]="form" (ngSubmit)="submit()">
+      <section class="focus-form-section">
+        <h2 class="focus-form-section-title">Datos del cliente</h2>
+        <div class="focus-form-grid focus-form-grid--2">
+          <label class="focus-field">
+            <span class="focus-field-label">Nombre completo</span>
+            <input formControlName="fullName" autocomplete="name" placeholder="Nombre y apellidos" />
+          </label>
+          <label class="focus-field">
+            <span class="focus-field-label">Teléfono</span>
+            <input
+              formControlName="phone"
+              type="tel"
+              class="focus-input-mono"
+              autocomplete="tel"
+              placeholder="10 dígitos"
+            />
+          </label>
+        </div>
+        <label class="focus-field focus-field--full">
+          <span class="focus-field-label">Dirección <span class="focus-field-optional">(opcional)</span></span>
+          <textarea formControlName="addressNote" rows="3" placeholder="Calle, colonia, referencias"></textarea>
+        </label>
+      </section>
+
+      @if (saveError(); as se) {
+        <p class="focus-form-error" role="alert">{{ se }}</p>
+      }
+
+      <footer class="focus-form-footer">
+        <a routerLink="/proveedor/clientes" class="btn-ghost">Cancelar</a>
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : 'Guardar cliente' }}
+        </button>
+      </footer>
+    </form>
+  }
+</div>

@@ -1,0 +1,72 @@
+<div class="admin-page">
+  <header class="admin-page-header">
+    <a routerLink="/admin/libros" class="admin-back-link">← Libros</a>
+    <h1>{{ isEdit() ? 'Editar libro' : 'Nuevo libro' }}</h1>
+    <p class="admin-page-lead muted">
+      {{ isEdit() ? 'Actualiza datos del título en el catálogo.' : 'Registra un nuevo título en el catálogo.' }}
+    </p>
+  </header>
+
+  <section class="admin-card">
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando…</p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" class="admin-form admin-form--two-col">
+        <label>
+          Categoría
+          <select formControlName="categoryId">
+            <option [ngValue]="null">—</option>
+            @for (c of categories(); track c.id) {
+              <option [ngValue]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          Título
+          <input formControlName="title" />
+        </label>
+        <label>
+          Precio (B)
+          <input type="number" step="0.01" min="0.01" formControlName="price" />
+        </label>
+        <label>
+          En manual de librería
+          <select formControlName="bookType">
+            <option value="UNITARIO">* Normal — solo este título en factura</option>
+            <option value="PAQUETE">** Suele incluir otro libro en la misma factura</option>
+          </select>
+        </label>
+        <label class="admin-form-span-2">
+          Nota interna (opcional)
+          <textarea formControlName="packageNote" placeholder="Ej. según plantilla marzo 2026"></textarea>
+        </label>
+        @if (isPaquete()) {
+          <label class="admin-form-span-2">
+            Libro que suele venir en la misma factura
+            <select formControlName="companionBookId">
+              <option [ngValue]="null">—</option>
+              @for (b of unitarioBooks(); track b.id) {
+                @if (b.id !== editBookId()) {
+                  <option [ngValue]="b.id">{{ b.title }} (B {{ b.price | number: '1.2-2' }})</option>
+                }
+              }
+            </select>
+          </label>
+          <p class="admin-form-hint admin-form-span-2 muted">
+            Cuando la librería cambie el manual, actualiza aquí. El proveedor replica la remisión línea por línea; el
+            sistema solo le recuerda qué otro título suele aparecer.
+          </p>
+        }
+        @if (error(); as err) {
+          <p class="err admin-form-span-2">{{ err }}</p>
+        }
+        <div class="admin-form-span-2 admin-form-actions">
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            {{ saving() ? 'Guardando…' : 'Guardar libro' }}
+          </button>
+          <a routerLink="/admin/libros" class="btn-ghost">Cancelar</a>
+        </div>
+      </form>
+    }
+  </section>
+</div>

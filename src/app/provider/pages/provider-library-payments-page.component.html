@@ -1,0 +1,57 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+      <h1>Pagos a la librería</h1>
+      <p class="focus-page-subtitle">Depósitos y abonos registrados a la librería.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else {
+    <section class="focus-table-panel">
+      <div class="focus-table-toolbar">
+        @if (rows().length > 0) {
+          <p class="focus-table-toolbar__meta">{{ rows().length }} pago{{ rows().length === 1 ? '' : 's' }}</p>
+        }
+        <div class="focus-table-toolbar__actions">
+          <a routerLink="/proveedor/pagos/nueva" class="btn-primary focus-form-actions-btn">Registrar pago</a>
+        </div>
+      </div>
+
+      @if (rows().length === 0) {
+        <p class="focus-table-empty">Sin pagos registrados.</p>
+      } @else {
+        <div class="table-scroll focus-table-scroll">
+          <table class="data-table data-table--numeric data-table--payments">
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col" class="col-num">Importe</th>
+                <th scope="col">Campaña</th>
+                <th scope="col" class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of rows(); track r.id) {
+                <tr>
+                  <td>{{ r.paidOn }}</td>
+                  <td class="col-num">{{ r.amount | number: '1.2-2' }}</td>
+                  <td>{{ r.campaignName ?? '—' }}</td>
+                  <td class="col-act">
+                    <a [routerLink]="['/proveedor/pagos', r.id]" class="focus-table-link">Ver</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

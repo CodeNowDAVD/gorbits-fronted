@@ -1,0 +1,53 @@
+<div class="focus-page focus-page--form focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" backLink="/proveedor/pagos" backLabel="← Pagos" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+      <h1>Registrar pago a la librería</h1>
+      <p class="focus-page-subtitle">Depósito o abono que reduces del saldo pendiente con la librería.</p>
+    </div>
+  </header>
+
+  <form class="focus-form" [formGroup]="form" (ngSubmit)="submit()">
+    <section class="focus-form-section">
+      <h2 class="focus-form-section-title">Datos del pago</h2>
+      <div class="focus-form-grid focus-form-grid--2">
+        <label class="focus-field">
+          <span class="focus-field-label">Importe</span>
+          <input type="number" step="0.01" min="0.01" formControlName="amount" />
+        </label>
+        <label class="focus-field">
+          <span class="focus-field-label">Fecha de pago</span>
+          <input type="date" formControlName="paidOn" />
+        </label>
+        <label class="focus-field">
+          <span class="focus-field-label">Campaña <span class="focus-field-optional">(opcional)</span></span>
+          <div class="focus-select-wrap">
+            <select formControlName="campaignId" class="focus-select">
+              <option [ngValue]="null">Sin campaña</option>
+              @for (c of campaigns(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+        </label>
+        <label class="focus-field focus-field--full">
+          <span class="focus-field-label">Nota <span class="focus-field-optional">(opcional)</span></span>
+          <textarea formControlName="note" rows="2" placeholder="Referencia o comentario"></textarea>
+        </label>
+      </div>
+
+      @if (error(); as err) {
+        <p class="focus-form-error" role="alert">{{ err }}</p>
+      }
+
+      <div class="focus-form-section-actions focus-form-section-actions--end">
+        <a routerLink="/proveedor/pagos" class="btn-ghost">Cancelar</a>
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : 'Registrar pago' }}
+        </button>
+      </div>
+    </section>
+  </form>
+</div>

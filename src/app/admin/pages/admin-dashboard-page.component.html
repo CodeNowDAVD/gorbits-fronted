@@ -1,0 +1,125 @@
+<div class="admin-page admin-dashboard">
+  <header class="admin-page-header admin-report-meta">
+    <div>
+      <h1>Reporte general</h1>
+      <p class="admin-page-lead muted">Resumen operativo del sistema desde el servidor.</p>
+    </div>
+    @if (loadedAt(); as at) {
+      <span class="admin-report-updated">Actualizado {{ at | date: 'short' }}</span>
+    }
+  </header>
+
+  @if (loading()) {
+    <section class="admin-card">
+      <p class="admin-loading muted">Cargando reporte…</p>
+    </section>
+  } @else if (error(); as e) {
+    <section class="admin-card">
+      <p class="err admin-empty">{{ e }}</p>
+    </section>
+  } @else if (data(); as d) {
+    <section class="admin-card">
+      <h2 class="admin-card-title">Indicadores</h2>
+      <div class="admin-kpi-grid">
+        <article class="admin-kpi admin-kpi--accent">
+          <span class="admin-kpi-label">Contratos (total)</span>
+          <span class="admin-kpi-value">{{ totalGuides() }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Activas</span>
+          <span class="admin-kpi-value">{{ d.guidesByStatus.activa }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Cerradas</span>
+          <span class="admin-kpi-value">{{ d.guidesByStatus.cerrada }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Devueltas</span>
+          <span class="admin-kpi-value">{{ d.guidesByStatus.devuelta }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Uds. almacén</span>
+          <span class="admin-kpi-value">{{ d.totalWarehouseUnits }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Uds. en campo</span>
+          <span class="admin-kpi-value">{{ d.totalFieldStockUnits }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Compra librería</span>
+          <span class="admin-kpi-value">{{ d.totalLibraryPurchasedUnits }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Proveedores</span>
+          <span class="admin-kpi-value">{{ providerCount() }}</span>
+        </article>
+        <article class="admin-kpi">
+          <span class="admin-kpi-label">Usuarios</span>
+          <span class="admin-kpi-value">{{ userCount() }}</span>
+        </article>
+      </div>
+    </section>
+
+    <div class="admin-report-grid">
+      <section class="admin-card" aria-labelledby="chart-guides-title">
+        <h2 id="chart-guides-title" class="admin-card-title">Contratos por estado</h2>
+        <div class="admin-bars" role="list">
+          @for (row of guideBars(); track row.label) {
+            <div class="admin-bar-row" role="listitem">
+              <span class="admin-bar-label">{{ row.label }}</span>
+              <div class="admin-bar-track" aria-hidden="true">
+                <span
+                  class="admin-bar-fill admin-bar-fill--{{ row.tone }}"
+                  [style.width.%]="barWidth(row.value, maxGuideValue())"
+                ></span>
+              </div>
+              <span class="admin-bar-value">{{ row.value }}</span>
+            </div>
+          }
+        </div>
+        <div class="admin-legend">
+          <span class="admin-legend-item admin-legend-item--active">Activas</span>
+          <span class="admin-legend-item admin-legend-item--closed">Cerradas</span>
+          <span class="admin-legend-item admin-legend-item--returned">Devueltas</span>
+        </div>
+      </section>
+
+      <section class="admin-card" aria-labelledby="chart-stock-title">
+        <h2 id="chart-stock-title" class="admin-card-title">Unidades de inventario</h2>
+        <div class="admin-bars" role="list">
+          @for (row of stockBars(); track row.label) {
+            <div class="admin-bar-row" role="listitem">
+              <span class="admin-bar-label">{{ row.label }}</span>
+              <div class="admin-bar-track" aria-hidden="true">
+                <span
+                  class="admin-bar-fill admin-bar-fill--{{ row.tone }}"
+                  [style.width.%]="barWidth(row.value, maxStockValue())"
+                ></span>
+              </div>
+              <span class="admin-bar-value">{{ row.value }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <section class="admin-card" aria-labelledby="chart-books-title">
+      <h2 id="chart-books-title" class="admin-card-title">Top libros en contratos cerrados</h2>
+      @if (topBookBars().length === 0) {
+        <p class="admin-empty muted">Aún no hay ventas registradas en contratos cerrados.</p>
+      } @else {
+        <div class="admin-bars" role="list">
+          @for (row of topBookBars(); track row.label) {
+            <div class="admin-bar-row" role="listitem">
+              <span class="admin-bar-label admin-bar-label--book" [title]="row.label">{{ row.label }}</span>
+              <div class="admin-bar-track" aria-hidden="true">
+                <span class="admin-bar-fill admin-bar-fill--book" [style.width.%]="row.pct"></span>
+              </div>
+              <span class="admin-bar-value">{{ row.value }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

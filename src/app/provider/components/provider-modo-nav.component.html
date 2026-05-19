@@ -1,0 +1,29 @@
+<nav
+  class="focus-modo-nav"
+  [class.focus-modo-nav--campo]="mode() === 'campo'"
+  [class.focus-modo-nav--cobranza]="mode() === 'cobranza'"
+  [class.focus-modo-nav--carga]="mode() === 'carga'"
+  [class.focus-modo-nav--caja]="mode() === 'caja'"
+  [attr.aria-label]="config().ariaLabel"
+>
+  <div class="focus-modo-nav__row">
+    @if (backLink(); as link) {
+      <a [routerLink]="link" class="focus-modo-nav__back">{{ backLabel() }}</a>
+    }
+    @if (showTabs()) {
+      <div class="focus-modo-nav__tabs" role="tablist">
+        @for (tab of config().tabs; track tab.link) {
+          <a
+            [routerLink]="tab.link"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="tabMatch(tab)"
+            class="focus-modo-nav__tab"
+            role="tab"
+          >
+            {{ tab.label }}
+          </a>
+        }
+      </div>
+    }
+  </div>
+</nav>

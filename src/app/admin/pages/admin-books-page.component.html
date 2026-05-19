@@ -1,0 +1,79 @@
+<div class="admin-page">
+  <header class="admin-page-header admin-report-meta">
+    <div>
+      <h1>Libros</h1>
+      <p class="admin-page-lead muted">Consulta y edita el catálogo (títulos, precios, categorías).</p>
+    </div>
+    <a routerLink="/admin/libros/nuevo" class="btn-primary">Nuevo libro</a>
+  </header>
+
+  <section class="admin-card">
+    <div class="admin-toolbar">
+      <label class="admin-filter">
+        Categoría
+        <select
+          [ngModel]="filterCategoryId()"
+          (ngModelChange)="onCategoryFilterChange($event)"
+          name="categoryFilter"
+        >
+          <option [ngValue]="null">Todas</option>
+          @for (c of categories(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </label>
+      @if (!loading() && !error()) {
+        <span class="admin-toolbar-meta muted"
+          >{{ rows().length }} título{{ rows().length === 1 ? '' : 's' }}</span
+        >
+      }
+    </div>
+
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando libros…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else if (rows().length === 0) {
+      <p class="admin-empty muted">Sin libros en esta vista.</p>
+    } @else {
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Categoría</th>
+              <th class="col-num">Precio</th>
+              <th>Tipo</th>
+              <th>Nota paquete</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (b of rows(); track b.id) {
+              <tr>
+                <td><strong>{{ b.title }}</strong></td>
+                <td>{{ b.categoryName }}</td>
+                <td class="col-num">B {{ b.price | number: '1.2-2' }}</td>
+                <td>
+                  <span
+                    class="admin-badge"
+                    [class.admin-badge--type-unit]="b.bookType === 'UNITARIO'"
+                    [class.admin-badge--type-pack]="b.bookType === 'PAQUETE'"
+                    >{{ b.bookType }}</span
+                  >
+                </td>
+                <td class="muted">{{ b.packageNote ?? '—' }}</td>
+                <td class="admin-actions-cell">
+                  <a class="admin-link" [routerLink]="['/admin/libros', b.id]">Editar</a>
+                  <button type="button" class="btn-ghost" [disabled]="busyId() === b.id" (click)="remove(b.id)">
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

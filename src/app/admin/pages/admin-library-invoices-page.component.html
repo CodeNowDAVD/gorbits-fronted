@@ -1,0 +1,61 @@
+<div class="admin-page">
+  <header class="admin-page-header admin-report-meta">
+    <div>
+      <h1>Facturas de librería</h1>
+      <p class="admin-page-lead muted">Remisiones registradas por proveedor.</p>
+    </div>
+    <a routerLink="/admin/facturas-libreria/nueva" class="btn-primary">Nueva factura</a>
+  </header>
+
+  <section class="admin-card">
+    <div class="admin-toolbar">
+      <label class="admin-filter">
+        Filtrar por proveedor
+        <select [(ngModel)]="filterProviderId" name="provFilter">
+          <option [ngValue]="null">Todos</option>
+          @for (p of providers(); track p.id) {
+            <option [ngValue]="p.id">{{ p.username }} ({{ p.id }})</option>
+          }
+        </select>
+      </label>
+      <button type="button" class="btn-ghost" (click)="applyFilter()">Aplicar filtro</button>
+    </div>
+
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando facturas…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else if (rows().length === 0) {
+      <p class="admin-empty muted">Sin facturas en esta vista.</p>
+    } @else {
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nº</th>
+              <th>Propietario</th>
+              <th>Fecha</th>
+              <th class="col-num">Unidades</th>
+              <th class="col-num">Importe</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.id) {
+              <tr>
+                <td><strong>{{ r.invoiceNumber }}</strong></td>
+                <td>{{ r.ownerUsername }}</td>
+                <td>{{ r.issuedOn }}</td>
+                <td class="col-num">{{ r.totalUnits }}</td>
+                <td class="col-num">B {{ r.totalAmount | number: '1.2-2' }}</td>
+                <td class="admin-actions-cell">
+                  <a class="admin-link" [routerLink]="['/admin/facturas-libreria', r.id]">Ver detalle</a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

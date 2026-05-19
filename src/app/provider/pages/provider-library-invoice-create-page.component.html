@@ -1,0 +1,110 @@
+<div class="focus-page focus-page--form focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" backLink="/proveedor/facturas" backLabel="← Facturas" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+      <h1>Registrar factura de librería</h1>
+      <p class="focus-page-subtitle">
+        Replica tu remisión: una línea por título y cantidad. El precio sale del catálogo (* y ** según manual de librería).
+      </p>
+    </div>
+  </header>
+
+  <form class="focus-form" [formGroup]="form" (ngSubmit)="submit()">
+    <section class="focus-form-section">
+      <h2 class="focus-form-section-title">Datos de la factura</h2>
+      <div class="focus-form-grid focus-form-grid--2">
+        <label class="focus-field">
+          <span class="focus-field-label">Número de factura / remisión</span>
+          <input formControlName="invoiceNumber" class="focus-input-mono" placeholder="Ej. RP1_0000002068" />
+        </label>
+        <label class="focus-field">
+          <span class="focus-field-label">Fecha emisión</span>
+          <input type="date" formControlName="issuedOn" />
+        </label>
+        <label class="focus-field focus-field--full">
+          <span class="focus-field-label">Nota <span class="focus-field-optional">(opcional)</span></span>
+          <textarea formControlName="note" rows="2" placeholder="Observaciones"></textarea>
+        </label>
+      </div>
+    </section>
+
+    <section class="focus-form-section focus-form-section--lines">
+      <div class="focus-section-head">
+        <div>
+          <h2 class="focus-form-section-title">Líneas de la remisión</h2>
+          <p class="focus-form-section-lead">Una línea por cada título facturado.</p>
+        </div>
+        <button type="button" class="btn-ghost focus-btn-add-line" (click)="addLine()">
+          <span aria-hidden="true">+</span> Añadir línea
+        </button>
+      </div>
+
+      <div formArrayName="lines" class="focus-invoice-lines">
+        @for (_line of lines.controls; track $index; let i = $index) {
+          <article class="focus-invoice-line" [formGroupName]="i">
+            <span class="focus-invoice-line__index" aria-hidden="true">{{ i + 1 }}</span>
+            <div class="focus-invoice-line__body">
+              <label class="focus-field">
+                <span class="focus-field-label">Libro</span>
+                <div class="focus-select-wrap">
+                  <select formControlName="bookId" class="focus-select">
+                    <option [ngValue]="null">Seleccionar libro…</option>
+                    @for (b of books(); track b.id) {
+                      <option [ngValue]="b.id">{{ catalogLabel(b) }}</option>
+                    }
+                  </select>
+                </div>
+              </label>
+              @if (bookById(lines.at(i).value.bookId); as bk) {
+                <p class="focus-invoice-line__hint">{{ unitPriceLabel(bk) }}</p>
+                @if (inclusionHint(bk); as hint) {
+                  <p class="focus-invoice-line__hint">{{ hint }}</p>
+                }
+                @if (canAddIncludedLine(i)) {
+                  <button type="button" class="btn-ghost focus-invoice-line__add-included" (click)="addIncludedLine(i)">
+                    + Añadir «{{ includedTitle(i) }}» (misma cantidad)
+                  </button>
+                }
+              }
+              <div class="focus-form-grid focus-form-grid--2">
+                <label class="focus-field">
+                  <span class="focus-field-label">Cantidad</span>
+                  <input type="number" min="1" formControlName="quantity" (change)="onQuantityChange(i)" />
+                </label>
+                <label class="focus-field">
+                  <span class="focus-field-label">Descuento % <span class="focus-field-optional">(opc.)</span></span>
+                  <input type="number" min="0" max="100" step="0.01" formControlName="discountPercent" />
+                </label>
+              </div>
+              <p class="focus-invoice-line__subtotal">
+                Subtotal línea: <strong>B {{ lineAmount(i) | number: '1.2-2' }}</strong>
+              </p>
+              @if (lines.length > 1) {
+                <button type="button" class="focus-table-link focus-table-link--danger focus-invoice-line__remove" (click)="removeLine(i)">
+                  Quitar línea
+                </button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+
+      <p class="focus-invoice-total">
+        Total factura: <strong>B {{ invoiceTotal() | number: '1.2-2' }}</strong>
+      </p>
+
+      @if (error(); as err) {
+        <p class="focus-form-error" role="alert">{{ err }}</p>
+      }
+
+      <div class="focus-form-section-actions focus-form-section-actions--end">
+        <a routerLink="/proveedor/facturas" class="btn-ghost">Cancelar</a>
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : 'Registrar factura' }}
+        </button>
+      </div>
+    </section>
+  </form>
+</div>

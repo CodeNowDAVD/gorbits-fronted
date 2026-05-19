@@ -1,0 +1,54 @@
+<div class="focus-page focus-page--detail focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" backLink="/proveedor/facturas" backLabel="← Facturas" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    @if (loading()) {
+      <p class="focus-table-message muted">Cargando…</p>
+    } @else if (error(); as e) {
+      <p class="focus-table-message err">{{ e }}</p>
+    } @else if (detail(); as inv) {
+      <div class="focus-work-header-text">
+        <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+        <h1>Factura {{ inv.invoiceNumber }}</h1>
+        <p class="focus-detail-meta">
+          <span>Emisión {{ inv.issuedOn }}</span>
+          <span>{{ inv.totalUnits }} u.</span>
+          <span>{{ inv.totalAmount | number: '1.2-2' }}</span>
+        </p>
+        @if (inv.note) {
+          <p class="focus-detail-note">{{ inv.note }}</p>
+        }
+      </div>
+    }
+  </header>
+
+  @if (!loading() && !error() && detail(); as inv) {
+    <section class="focus-table-panel">
+      <h2 class="focus-table-panel-title">Líneas</h2>
+      <div class="table-scroll focus-table-scroll">
+        <table class="data-table data-table--numeric data-table--invoice-lines">
+          <thead>
+            <tr>
+              <th scope="col">Libro</th>
+              <th scope="col" class="col-num">Facturado</th>
+              <th scope="col" class="col-num">Devuelto</th>
+              <th scope="col" class="col-num">Neto</th>
+              <th scope="col" class="col-num">Importe</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of inv.lines; track line.id) {
+              <tr>
+                <td>{{ line.title }}</td>
+                <td class="col-num">{{ line.invoicedQuantity }}</td>
+                <td class="col-num">{{ line.returnedQuantity }}</td>
+                <td class="col-num">{{ line.netQuantity }}</td>
+                <td class="col-num">{{ line.lineTotal | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

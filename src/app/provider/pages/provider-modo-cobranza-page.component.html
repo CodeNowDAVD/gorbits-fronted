@@ -1,0 +1,69 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="cobranza" />
+
+  <header class="focus-work-header">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--cobranza">Trabajo</span>
+      <h1>Modo Cobranza</h1>
+      <p class="focus-page-subtitle">Registrar pagos y revisar cuotas pendientes o vencidas.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando resumen…</p>
+  } @else {
+    <ul class="focus-stat-row" aria-label="Resumen de cobranza">
+      <li>
+        <span class="focus-stat-row-label">Vencidas</span>
+        <span class="focus-stat-row-value">{{ pastDue() }}</span>
+      </li>
+      <li>
+        <span class="focus-stat-row-label">Pendientes</span>
+        <span class="focus-stat-row-value">{{ pending() }}</span>
+      </li>
+      <li>
+        <span class="focus-stat-row-label">Importe pendiente</span>
+        <span class="focus-stat-row-value">{{ totalPending() | number: '1.2-2' }}</span>
+      </li>
+    </ul>
+  }
+
+  <section class="focus-action-panel">
+    <h2 class="focus-action-panel-title">¿Qué necesitas hacer?</h2>
+    <nav class="focus-action-list" aria-label="Acciones de cobranza">
+      <a routerLink="/proveedor/cobranza" class="focus-action-item focus-action-item--cobranza">
+        <span class="focus-action-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+        </span>
+        <span class="focus-action-item__body">
+          <strong>Resumen y vencidas</strong>
+          <span>Listado de cuotas por cobrar</span>
+        </span>
+        <span class="focus-action-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </a>
+      <a routerLink="/proveedor/calendario-cuotas" class="focus-action-item focus-action-item--cobranza">
+        <span class="focus-action-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+            <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+          </svg>
+        </span>
+        <span class="focus-action-item__body">
+          <strong>Calendario</strong>
+          <span>Vencimientos agrupados por fecha</span>
+        </span>
+        <span class="focus-action-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </a>
+    </nav>
+    <p class="focus-hint-box">
+      Los abonos y reprogramaciones se registran desde el detalle de cada contrato.
+    </p>
+  </section>
+</div>

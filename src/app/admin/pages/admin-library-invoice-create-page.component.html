@@ -1,0 +1,92 @@
+<div class="admin-page">
+  <header class="admin-page-header">
+    <a routerLink="/admin/facturas-libreria" class="admin-back-link">← Facturas</a>
+    <h1>Nueva factura de librería</h1>
+    <p class="admin-page-lead muted">Replica la remisión: una línea por título. Precio desde catálogo (* / **).</p>
+  </header>
+
+  <section class="admin-card">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="admin-form admin-form--two-col">
+      <label>
+        Proveedor (propietario)
+        <select formControlName="ownerUserId">
+          <option [ngValue]="null">—</option>
+          @for (p of providers(); track p.id) {
+            <option [ngValue]="p.id">{{ p.username }} (id {{ p.id }})</option>
+          }
+        </select>
+      </label>
+      <label>
+        Número de factura / remisión
+        <input formControlName="invoiceNumber" />
+      </label>
+      <label>
+        Fecha emisión
+        <input type="date" formControlName="issuedOn" />
+      </label>
+      <label class="admin-form-span-2">
+        Nota (opcional)
+        <textarea formControlName="note"></textarea>
+      </label>
+
+      <div class="admin-form-span-2 admin-invoice-lines" formArrayName="lines">
+        @for (_line of lines.controls; track $index; let i = $index) {
+          <div [formGroupName]="i" class="admin-invoice-line">
+            <div class="admin-invoice-line-head">
+              <span>Línea {{ i + 1 }}</span>
+              @if (lines.length > 1) {
+                <button type="button" class="btn-ghost" (click)="removeLine(i)">Quitar</button>
+              }
+            </div>
+            <label>
+              Libro
+              <select formControlName="bookId">
+                <option [ngValue]="null">—</option>
+                @for (b of books(); track b.id) {
+                  <option [ngValue]="b.id">{{ catalogLabel(b) }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Cantidad
+              <input type="number" min="1" formControlName="quantity" (change)="onQuantityChange(i)" />
+            </label>
+            @if (bookById(lines.at(i).value.bookId); as bk) {
+              <p class="line-hint muted">{{ unitPriceLabel(bk) }}</p>
+              @if (inclusionHint(bk); as hint) {
+                <p class="line-hint muted">{{ hint }}</p>
+              }
+              @if (canAddIncludedLine(i)) {
+                <button type="button" class="btn-ghost" (click)="addIncludedLine(i)">
+                  + Añadir línea «{{ includedTitle(i) }}»
+                </button>
+              }
+            }
+            <label>
+              Descuento % (opcional)
+              <input type="number" min="0" max="100" step="0.01" formControlName="discountPercent" />
+            </label>
+            <p class="line-subtotal">
+              Subtotal: <strong>B {{ lineAmount(i) | number: '1.2-2' }}</strong>
+            </p>
+          </div>
+        }
+      </div>
+
+      <p class="admin-total-bar admin-form-span-2">
+        Total factura: <strong>B {{ invoiceTotal() | number: '1.2-2' }}</strong>
+      </p>
+
+      @if (error(); as err) {
+        <p class="err admin-form-span-2">{{ err }}</p>
+      }
+
+      <div class="admin-form-span-2 admin-form-actions">
+        <button type="button" class="btn-ghost" (click)="addLine()">Añadir línea</button>
+        <button type="submit" class="btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : 'Registrar factura' }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

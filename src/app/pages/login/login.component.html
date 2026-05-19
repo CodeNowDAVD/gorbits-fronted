@@ -1,0 +1,26 @@
+<div class="login-page">
+  <div class="card">
+    <h1>GOrbitS</h1>
+    <p class="subtitle">Inicia sesión para continuar</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label class="field">
+        <span>Usuario</span>
+        <input type="text" formControlName="username" name="username" autocomplete="username" />
+      </label>
+
+      <label class="field">
+        <span>Contraseña</span>
+        <input type="password" formControlName="password" name="password" autocomplete="current-password" />
+      </label>
+
+      @if (error(); as err) {
+        <p class="error" role="alert">{{ err }}</p>
+      }
+
+      <button type="submit" class="primary" [disabled]="submitting()">
+        {{ submitting() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+  </div>
+</div>

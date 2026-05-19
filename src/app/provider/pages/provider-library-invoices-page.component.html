@@ -1,0 +1,59 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+      <h1>Facturas de librería</h1>
+      <p class="focus-page-subtitle">Compras y remisiones registradas a la librería.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else {
+    <section class="focus-table-panel">
+      <div class="focus-table-toolbar">
+        @if (rows().length > 0) {
+          <p class="focus-table-toolbar__meta">{{ rows().length }} factura{{ rows().length === 1 ? '' : 's' }}</p>
+        }
+        <div class="focus-table-toolbar__actions">
+          <a routerLink="/proveedor/facturas/nueva" class="btn-primary focus-form-actions-btn">Nueva factura</a>
+        </div>
+      </div>
+
+      @if (rows().length === 0) {
+        <p class="focus-table-empty">Sin facturas registradas.</p>
+      } @else {
+        <div class="table-scroll focus-table-scroll">
+          <table class="data-table data-table--numeric data-table--invoices">
+            <thead>
+              <tr>
+                <th scope="col">Nº</th>
+                <th scope="col">Fecha</th>
+                <th scope="col" class="col-num">Unidades</th>
+                <th scope="col" class="col-num">Importe</th>
+                <th scope="col" class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of rows(); track r.id) {
+                <tr>
+                  <td>{{ r.invoiceNumber }}</td>
+                  <td>{{ r.issuedOn }}</td>
+                  <td class="col-num">{{ r.totalUnits }}</td>
+                  <td class="col-num">{{ r.totalAmount | number: '1.2-2' }}</td>
+                  <td class="col-act">
+                    <a [routerLink]="['/proveedor/facturas', r.id]" class="focus-table-link">Ver</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>

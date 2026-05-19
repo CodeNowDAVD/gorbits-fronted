@@ -1,0 +1,116 @@
+.shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+}
+
+.brand {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--gibbor-blue);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--gibbor-blue-hover);
+  }
+}
+
+.nav {
+  display: flex;
+  gap: 0.35rem;
+  flex: 1;
+
+  a {
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+
+    &:hover {
+      color: #111827;
+      background: #f3f4f6;
+    }
+
+    &.active {
+      color: #111827;
+      background: var(--gibbor-blue-soft);
+      border-color: var(--gibbor-blue-border);
+      font-weight: 600;
+    }
+  }
+}
+
+.who {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.ghost {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  font-size: 0.875rem;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #111827;
+  }
+}
+
+.main {
+  flex: 1;
+  padding: 1.25rem;
+  max-width: 56rem;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Área proveedor: pantalla completa, sin nav global duplicada */
+.shell-proveedor {
+  background: #f4f6fb;
+
+  .top {
+    display: none;
+  }
+
+  .main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+}
+
+/* Área admin: sidebar propio, pantalla completa */
+.shell-admin {
+  background: #eef1f6;
+
+  .top {
+    display: none;
+  }
+
+  .main {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+}

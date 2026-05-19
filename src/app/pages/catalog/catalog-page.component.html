@@ -1,0 +1,65 @@
+<div class="focus-page focus-page--hub">
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--gestion">Gestión</span>
+      <h1>Catálogo de libros</h1>
+      <p class="focus-page-subtitle">Consulta títulos, precios y categorías de la campaña.</p>
+    </div>
+  </header>
+
+  <section class="focus-dashboard" aria-label="Catálogo de libros">
+    <div class="focus-dashboard__filters">
+      <label class="focus-field focus-field--filter">
+        <span class="focus-field-label">Categoría</span>
+        <div class="focus-select-wrap">
+          <select
+            class="focus-select"
+            (change)="onCategoryFilterChange($event)"
+            [value]="selectedCategoryId() ?? ''"
+          >
+            <option value="">Todas</option>
+            @for (c of categories(); track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+      </label>
+    </div>
+
+    <div class="focus-dashboard__section">
+      @if (loading()) {
+        <p class="focus-table-message muted">Cargando…</p>
+      } @else if (error(); as err) {
+        <p class="focus-form-error" role="alert">{{ err }}</p>
+      } @else if (books().length === 0) {
+        <p class="focus-table-empty">No hay libros en esta vista.</p>
+      } @else {
+        <p class="focus-dashboard__meta">{{ books().length }} título{{ books().length === 1 ? '' : 's' }}</p>
+        <div class="table-scroll focus-table-scroll">
+          <table class="data-table data-table--numeric data-table--catalog">
+            <thead>
+              <tr>
+                <th scope="col">Título</th>
+                <th scope="col">Categoría</th>
+                <th scope="col" class="col-num">Precio</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Nota paquete</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of books(); track b.id) {
+                <tr>
+                  <td class="col-title">{{ b.title }}</td>
+                  <td>{{ b.categoryName }}</td>
+                  <td class="col-num">{{ b.price | number: '1.2-2' }}</td>
+                  <td class="col-type">{{ b.bookType }}</td>
+                  <td class="col-note">{{ b.packageNote ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </section>
+</div>

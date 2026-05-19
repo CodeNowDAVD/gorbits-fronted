@@ -1,0 +1,91 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="carga" />
+
+  <header class="focus-work-header">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--carga">Trabajo</span>
+      <h1>Modo Carga</h1>
+      <p class="focus-page-subtitle">Stock disponible, devoluciones a librería y movimientos de inventario.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando resumen…</p>
+  } @else {
+    <p class="focus-inline-stat" aria-label="Resumen de stock">
+      <span class="focus-inline-stat__label">Unidades en tu stock</span>
+      <span class="focus-inline-stat__value">{{ totalUnits() }}</span>
+    </p>
+  }
+
+  <section class="focus-action-panel">
+    <h2 class="focus-action-panel-title">¿Qué necesitas hacer?</h2>
+    <nav class="focus-action-list" aria-label="Acciones de carga">
+      <a routerLink="/proveedor/mi-stock" class="focus-action-item focus-action-item--carga">
+        <span class="focus-action-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+            <line x1="12" y1="22.08" x2="12" y2="12" />
+          </svg>
+        </span>
+        <span class="focus-action-item__body">
+          <strong>Mi stock</strong>
+          <span>Disponible por libro y categoría</span>
+        </span>
+        <span class="focus-action-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </a>
+      <a routerLink="/proveedor/stock-categorias" class="focus-action-item focus-action-item--carga">
+        <span class="focus-action-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+        </span>
+        <span class="focus-action-item__body">
+          <strong>Stock por categoría</strong>
+          <span>Resumen agrupado por categoría</span>
+        </span>
+        <span class="focus-action-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </a>
+      <a routerLink="/proveedor/devoluciones" class="focus-action-item focus-action-item--carga">
+        <span class="focus-action-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 10h10a4 4 0 0 1 4 4v0a4 4 0 0 1-4 4H5" />
+            <path d="M7 6 3 10l4 4" />
+          </svg>
+        </span>
+        <span class="focus-action-item__body">
+          <strong>Devoluciones a librería</strong>
+          <span>Registrar y consultar devoluciones</span>
+        </span>
+        <span class="focus-action-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </a>
+      <a routerLink="/proveedor/movimientos" class="focus-action-item focus-action-item--carga">
+        <span class="focus-action-item__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18" />
+            <path d="M18 17V9" />
+            <path d="M13 17V5" />
+            <path d="M8 17v-3" />
+          </svg>
+        </span>
+        <span class="focus-action-item__body">
+          <strong>Movimientos</strong>
+          <span>Historial de entradas y salidas</span>
+        </span>
+        <span class="focus-action-item__chevron" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" /></svg>
+        </span>
+      </a>
+    </nav>
+  </section>
+</div>

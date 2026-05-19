@@ -1,0 +1,50 @@
+<div class="focus-page focus-page--detail focus-page--modo-section">
+  <app-provider-modo-nav mode="carga" backLink="/proveedor/devoluciones" backLabel="← Devoluciones" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    @if (loading()) {
+      <p class="focus-table-message muted">Cargando…</p>
+    } @else if (error(); as e) {
+      <p class="focus-table-message err">{{ e }}</p>
+    } @else if (detail(); as r) {
+      <div class="focus-work-header-text">
+        <span class="focus-work-eyebrow focus-work-eyebrow--carga">Carga</span>
+        <h1>Devolución #{{ r.id }}</h1>
+        <p class="focus-detail-meta">
+          <span>{{ formatDateTime(r.createdAt) }}</span>
+          <span>{{ r.totalUnits }} unidades</span>
+          <span>Campaña {{ r.campaignName ?? '—' }}</span>
+        </p>
+        @if (r.note) {
+          <p class="focus-detail-note">{{ r.note }}</p>
+        }
+      </div>
+    }
+  </header>
+
+  @if (!loading() && !error() && detail(); as r) {
+    <section class="focus-table-panel">
+      <h2 class="focus-table-panel-title">Líneas asignadas</h2>
+      <div class="table-scroll focus-table-scroll">
+        <table class="data-table data-table--numeric">
+          <thead>
+            <tr>
+              <th scope="col" class="col-seq">Línea factura</th>
+              <th scope="col">Libro</th>
+              <th scope="col" class="col-num">Cantidad</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of r.lines; track line.invoiceLineId) {
+              <tr>
+                <td class="col-seq">#{{ line.invoiceLineId }}</td>
+                <td>{{ line.bookTitle }}</td>
+                <td class="col-num">{{ line.quantity }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

@@ -1,0 +1,129 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+      <h1>Informe de cierre</h1>
+      <p class="focus-page-subtitle">Ventas, cobranza y resumen con la librería al cerrar una campaña.</p>
+    </div>
+  </header>
+
+  <section class="focus-toolbar">
+    <label class="focus-field focus-field--filter">
+      <span class="focus-field-label">Campaña</span>
+      <div class="focus-select-wrap">
+        <select
+          class="focus-select"
+          [(ngModel)]="selectedCampaignId"
+          (ngModelChange)="onCampaignChange()"
+          name="campaignPick"
+        >
+          @for (c of campaigns(); track c.id) {
+            <option [ngValue]="c.id">{{ c.name }}</option>
+          }
+        </select>
+      </div>
+    </label>
+  </section>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else if (report(); as r) {
+    <section class="focus-table-panel focus-table-panel--report">
+      <p class="focus-report-campaign focus-report-campaign--in-panel">
+        <strong>{{ r.campaignName }}</strong> · {{ r.startsOn }} → {{ r.endsOn }}
+      </p>
+
+      <div class="focus-report focus-report--in-panel">
+        <section class="focus-report-section" aria-labelledby="close-guides-heading">
+          <h3 id="close-guides-heading">Guías de campaña</h3>
+          <ul class="focus-stat-row focus-stat-row--in-panel">
+            <li>
+              <span class="focus-stat-row-label">Activas</span>
+              <span class="focus-stat-row-value">{{ r.guidesActive }}</span>
+            </li>
+            <li>
+              <span class="focus-stat-row-label">Cerradas</span>
+              <span class="focus-stat-row-value">{{ r.guidesClosed }}</span>
+            </li>
+            <li>
+              <span class="focus-stat-row-label">Devueltas</span>
+              <span class="focus-stat-row-value">{{ r.guidesReturned }}</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="focus-report-section" aria-labelledby="close-sales-heading">
+          <h3 id="close-sales-heading">Ventas</h3>
+          <table class="focus-summary-table">
+            <tbody>
+              <tr>
+                <th scope="row">Unidades vendidas</th>
+                <td class="col-num">{{ r.unitsSold }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Importe vendido</th>
+                <td class="col-num">{{ r.totalSoldAmount | number: '1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="focus-report-section" aria-labelledby="close-collect-heading">
+          <h3 id="close-collect-heading">Cobranza</h3>
+          <table class="focus-summary-table">
+            <tbody>
+              <tr>
+                <th scope="row">Total a cobrar</th>
+                <td class="col-num">{{ r.totalToCollect | number: '1.2-2' }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Ya cobrado</th>
+                <td class="col-num">{{ r.totalCollected | number: '1.2-2' }}</td>
+              </tr>
+              <tr class="focus-summary-table__total">
+                <th scope="row">Pendiente por cobrar</th>
+                <td class="col-num">{{ r.totalPending | number: '1.2-2' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        @if (r.librarySummary; as lib) {
+          <section class="focus-report-section" aria-labelledby="close-library-heading">
+            <h3 id="close-library-heading">Con la librería</h3>
+            <table class="focus-summary-table">
+              <tbody>
+                <tr>
+                  <th scope="row">Comprado a librería</th>
+                  <td class="col-num">{{ lib.purchasedFromLibraryUnits }} uds.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Devuelto a librería</th>
+                  <td class="col-num">{{ lib.returnedToLibraryUnits }} uds.</td>
+                </tr>
+                <tr>
+                  <th scope="row">Total facturado</th>
+                  <td class="col-num">{{ lib.totalInvoicedAmount | number: '1.2-2' }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">Total depósitos</th>
+                  <td class="col-num">{{ lib.totalDepositsToLibrary | number: '1.2-2' }}</td>
+                </tr>
+                <tr class="focus-summary-table__total">
+                  <th scope="row">Saldo neto debido a librería</th>
+                  <td class="col-num">{{ lib.netBalanceOwedToLibrary | number: '1.2-2' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </section>
+        }
+      </div>
+    </section>
+  } @else {
+    <p class="focus-table-message muted">Selecciona una campaña para ver el informe.</p>
+  }
+</div>

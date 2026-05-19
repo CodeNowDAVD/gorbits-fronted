@@ -1,0 +1,23 @@
+<div class="focus-page focus-page--detail focus-page--modo-section">
+  <app-provider-modo-nav mode="caja" backLink="/proveedor/pagos" backLabel="← Pagos" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    @if (loading()) {
+      <p class="focus-table-message muted">Cargando…</p>
+    } @else if (error(); as e) {
+      <p class="focus-table-message err">{{ e }}</p>
+    } @else if (detail(); as p) {
+      <div class="focus-work-header-text">
+        <span class="focus-work-eyebrow focus-work-eyebrow--caja">Caja</span>
+        <h1>Pago {{ p.amount | number: '1.2-2' }}</h1>
+        <p class="focus-detail-meta">
+          <span>Fecha {{ p.paidOn }}</span>
+          <span>Campaña {{ p.campaignName ?? '—' }}</span>
+        </p>
+        @if (p.note) {
+          <p class="focus-detail-note">{{ p.note }}</p>
+        }
+      </div>
+    }
+  </header>
+</div>

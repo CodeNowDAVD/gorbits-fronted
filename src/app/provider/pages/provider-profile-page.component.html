@@ -1,0 +1,52 @@
+<div class="focus-page focus-page--hub focus-page--profile">
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--gestion">Mi perfil</span>
+      <h1>Datos personales</h1>
+      <p class="focus-page-subtitle">Información registrada por administración. Solo lectura.</p>
+    </div>
+  </header>
+
+  <section class="focus-dashboard" aria-label="Perfil del embajador">
+    @if (loading()) {
+      <p class="focus-table-message muted">Cargando perfil…</p>
+    } @else if (loadError(); as le) {
+      <p class="focus-form-error" role="alert">{{ le }}</p>
+    } @else if (profile(); as p) {
+      <dl class="provider-profile-grid">
+        <div class="provider-profile-field">
+          <dt>Nombre</dt>
+          <dd>{{ field(p.firstName) }}</dd>
+        </div>
+        <div class="provider-profile-field">
+          <dt>Apellido</dt>
+          <dd>{{ field(p.lastName) }}</dd>
+        </div>
+        <div class="provider-profile-field">
+          <dt>DNI</dt>
+          <dd>{{ field(p.dni) }}</dd>
+        </div>
+        <div class="provider-profile-field">
+          <dt>Teléfono</dt>
+          <dd>{{ field(p.phone) }}</dd>
+        </div>
+        <div class="provider-profile-field">
+          <dt>Correo</dt>
+          <dd>{{ field(p.email) }}</dd>
+        </div>
+        <div class="provider-profile-field provider-profile-field--wide">
+          <dt>Carrera o profesión</dt>
+          <dd>{{ field(p.career) }}</dd>
+        </div>
+        <div class="provider-profile-field">
+          <dt>Usuario de acceso</dt>
+          <dd>{{ p.username }}</dd>
+        </div>
+        <div class="provider-profile-field">
+          <dt>Zona asignada</dt>
+          <dd>{{ field(p.zoneName) }}</dd>
+        </div>
+      </dl>
+    }
+  </section>
+</div>

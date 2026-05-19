@@ -1,0 +1,180 @@
+<div class="admin-page">
+  <header class="admin-page-header admin-report-meta">
+    <div>
+      <h1>Embajadores</h1>
+      <p class="admin-page-lead muted">
+        Registro y edición de perfiles. El rol (Admin / Embajador) y la contraseña se gestionan en
+        <a routerLink="/admin/usuarios" class="admin-link">Usuarios</a>.
+      </p>
+    </div>
+    <button type="button" class="btn-primary" (click)="toggleCreate()">
+      {{ showCreate() ? 'Cerrar formulario' : 'Nuevo embajador' }}
+    </button>
+  </header>
+
+  @if (showCreate()) {
+    <section class="admin-card">
+      <h2 class="admin-section-title">Alta embajador</h2>
+      @if (createValidationErr(); as ve) {
+        <p class="admin-feedback err">{{ ve }}</p>
+      }
+      <form [formGroup]="createForm" (ngSubmit)="createProvider()" class="admin-form admin-form--two-col">
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'username')">
+          Usuario de acceso
+          <input formControlName="username" autocomplete="off" />
+          @if (showFieldError(createForm, 'username')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'username') }}</span>
+          }
+        </label>
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'password')">
+          Contraseña inicial (≥8)
+          <input type="password" formControlName="password" autocomplete="new-password" />
+          @if (showFieldError(createForm, 'password')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'password') }}</span>
+          }
+        </label>
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'firstName')">
+          Nombre
+          <input formControlName="firstName" autocomplete="given-name" />
+          @if (showFieldError(createForm, 'firstName')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'firstName') }}</span>
+          }
+        </label>
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'lastName')">
+          Apellido
+          <input formControlName="lastName" autocomplete="family-name" />
+          @if (showFieldError(createForm, 'lastName')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'lastName') }}</span>
+          }
+        </label>
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'dni')">
+          DNI
+          <input formControlName="dni" autocomplete="off" />
+          @if (showFieldError(createForm, 'dni')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'dni') }}</span>
+          }
+        </label>
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'phone')">
+          Teléfono
+          <input formControlName="phone" type="tel" autocomplete="tel" />
+          @if (showFieldError(createForm, 'phone')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'phone') }}</span>
+          }
+        </label>
+        <label [class.admin-field-invalid]="showFieldError(createForm, 'email')">
+          Correo
+          <input formControlName="email" type="email" autocomplete="email" />
+          @if (showFieldError(createForm, 'email')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'email') }}</span>
+          }
+        </label>
+        <label class="admin-form-span-2" [class.admin-field-invalid]="showFieldError(createForm, 'career')">
+          Carrera o profesión
+          <input formControlName="career" autocomplete="organization-title" />
+          @if (showFieldError(createForm, 'career')) {
+            <span class="admin-field-err">{{ fieldErrorMessage(createForm, 'career') }}</span>
+          }
+        </label>
+        <div class="admin-form-span-2 admin-form-actions">
+          <button type="submit" class="btn-primary" [disabled]="creating()">
+            {{ creating() ? 'Creando…' : 'Crear embajador' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="toggleCreate()">Cancelar</button>
+        </div>
+      </form>
+      @if (createMsg(); as m) {
+        <p class="admin-feedback muted">{{ m }}</p>
+      }
+      @if (createErr(); as ce) {
+        <p class="admin-feedback err">{{ ce }}</p>
+      }
+    </section>
+  }
+
+  <section class="admin-card">
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando embajadores…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else if (rows().length === 0) {
+      <p class="admin-empty muted">No hay embajadores. Usa «Nuevo embajador» para registrar el primero.</p>
+    } @else {
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>DNI</th>
+              <th>Teléfono</th>
+              <th>Correo</th>
+              <th>Carrera</th>
+              <th>Zona</th>
+              <th>Usuario</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of rows(); track p.id) {
+              @if (editingId() === p.id) {
+                <tr [formGroup]="editForm" class="admin-row-active">
+                  <td>
+                    <input formControlName="firstName" class="admin-input-cell" placeholder="Nombre" />
+                  </td>
+                  <td>
+                    <input formControlName="lastName" class="admin-input-cell" placeholder="Apellido" />
+                  </td>
+                  <td>
+                    <input formControlName="dni" class="admin-input-cell" placeholder="DNI" />
+                  </td>
+                  <td>
+                    <input formControlName="phone" type="tel" class="admin-input-cell" placeholder="Teléfono" />
+                  </td>
+                  <td>
+                    <input formControlName="email" type="email" class="admin-input-cell" placeholder="Correo" />
+                  </td>
+                  <td>
+                    <input formControlName="career" class="admin-input-cell" placeholder="Carrera" />
+                  </td>
+                  <td class="muted">{{ p.zoneName ?? '—' }}</td>
+                  <td>
+                    <input formControlName="username" class="admin-input-cell" placeholder="Usuario de acceso" />
+                  </td>
+                  <td class="admin-actions-cell">
+                    <button type="button" class="btn-primary" [disabled]="saving()" (click)="saveEdit()">
+                      {{ saving() ? 'Guardando…' : 'Guardar' }}
+                    </button>
+                    <button type="button" class="btn-ghost" [disabled]="saving()" (click)="cancelEdit()">
+                      Cancelar
+                    </button>
+                  </td>
+                </tr>
+                @if (saveErr(); as se) {
+                  <tr class="admin-row-feedback">
+                    <td colspan="9">
+                      <p class="admin-feedback err">{{ se }}</p>
+                    </td>
+                  </tr>
+                }
+              } @else {
+                <tr>
+                  <td><strong>{{ displayFirstName(p) }}</strong></td>
+                  <td>{{ displayLastName(p) }}</td>
+                  <td>{{ p.dni ?? '—' }}</td>
+                  <td>{{ p.phone ?? '—' }}</td>
+                  <td>{{ p.email ?? '—' }}</td>
+                  <td>{{ p.career ?? '—' }}</td>
+                  <td>{{ p.zoneName ?? '—' }}</td>
+                  <td class="muted">{{ p.username }}</td>
+                  <td class="admin-actions-cell">
+                    <button type="button" class="admin-link" (click)="startEdit(p)">Editar</button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

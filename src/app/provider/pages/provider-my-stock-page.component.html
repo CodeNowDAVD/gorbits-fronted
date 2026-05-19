@@ -1,0 +1,57 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="carga" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--carga">Carga</span>
+      <h1>Mi stock</h1>
+      <p class="focus-page-subtitle">
+        Disponible = facturado en librería − vendido en contratos activos − devuelto a librería.
+      </p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else if (rows().length === 0) {
+    <p class="focus-table-message muted">Sin libros con stock. Registra una factura de librería primero.</p>
+  } @else {
+    <section class="focus-table-panel">
+      <div class="focus-panel-head">
+        <h2 class="focus-table-panel-title">Por libro</h2>
+        <p class="focus-panel-stat" aria-label="Total disponible">
+          <span class="focus-panel-stat__label">Disponibles</span>
+          <span class="focus-panel-stat__value">{{ totalAvailable() }}</span>
+        </p>
+      </div>
+      <div class="table-scroll focus-table-scroll">
+        <table class="data-table data-table--numeric data-table--stock">
+          <thead>
+            <tr>
+              <th scope="col">Libro</th>
+              <th scope="col">Categoría</th>
+              <th scope="col" class="col-num">Facturado</th>
+              <th scope="col" class="col-num">Vendido</th>
+              <th scope="col" class="col-num">Devuelto</th>
+              <th scope="col" class="col-num">Disponible</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.bookId) {
+              <tr>
+                <td>{{ r.bookTitle }}</td>
+                <td>{{ r.categoryName }}</td>
+                <td class="col-num">{{ r.purchasedFromLibrary }}</td>
+                <td class="col-num">{{ r.soldOnContracts }}</td>
+                <td class="col-num">{{ r.returnedToLibrary }}</td>
+                <td class="col-num"><strong>{{ r.available }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

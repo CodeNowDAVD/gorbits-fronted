@@ -1,0 +1,45 @@
+<section class="focus-home">
+  <header class="focus-page-header">
+    <div>
+      <h1 class="focus-page-title">Hola, {{ username() }} <span class="wave" aria-hidden="true">👋</span></h1>
+      @if (zoneName() || campaignLabel()) {
+        <p class="focus-page-subtitle">
+          @if (zoneName(); as z) {
+            <span>{{ z }}</span>
+          }
+          @if (campaignLabel(); as c) {
+            @if (zoneName()) {
+              <span class="dot">·</span>
+            }
+            <span>{{ c }}</span>
+          }
+        </p>
+      }
+    </div>
+    @if (alertCount() > 0) {
+      <a routerLink="/proveedor/cobranza" class="focus-notify" [attr.aria-label]="alertCount() + ' pendientes'">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        <span class="focus-notify-badge">{{ alertCount() }}</span>
+      </a>
+    }
+  </header>
+
+  <div class="focus-hero">
+    <div class="focus-hero-copy">
+      <div class="focus-hero-copy-inner">
+        <p class="focus-hero-kicker">Tu propósito de hoy</p>
+        <span class="focus-hero-kicker-line" aria-hidden="true"></span>
+        <h2 class="focus-hero-title">Tu trabajo de hoy mueve la campaña.</h2>
+        <p class="focus-hero-lead">
+          Vende con orden, cobra con claridad y cierra la campaña con responsabilidad.
+        </p>
+      </div>
+    </div>
+    <div class="focus-hero-art">
+      <img src="/assets/provider-cover.png" alt="" width="640" height="360" />
+    </div>
+  </div>
+</section>

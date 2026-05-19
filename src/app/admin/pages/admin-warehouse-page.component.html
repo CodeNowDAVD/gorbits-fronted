@@ -1,0 +1,50 @@
+<div class="admin-page">
+  <header class="admin-page-header">
+    <h1>Almacén global</h1>
+    <p class="admin-page-lead muted">Ajusta las unidades por libro. Solo administradores pueden modificar este stock.</p>
+  </header>
+
+  <section class="admin-card">
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando stock…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else if (rows().length === 0) {
+      <p class="admin-empty muted">Sin filas de stock en almacén.</p>
+    } @else {
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Libro</th>
+              <th class="col-num">Unidades</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.bookId) {
+              <tr>
+                <td><strong>{{ r.title }}</strong></td>
+                <td class="col-num">
+                  <input
+                    type="number"
+                    class="admin-input-qty"
+                    min="0"
+                    step="1"
+                    [value]="qtyDraft()[r.bookId]"
+                    (input)="patchQty(r.bookId, $event)"
+                  />
+                </td>
+                <td class="admin-actions-cell">
+                  <button type="button" class="btn-primary" [disabled]="savingId() === r.bookId" (click)="saveRow(r.bookId)">
+                    {{ savingId() === r.bookId ? 'Guardando…' : 'Guardar' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

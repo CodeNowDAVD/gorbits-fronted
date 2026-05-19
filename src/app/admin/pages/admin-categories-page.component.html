@@ -1,0 +1,116 @@
+<div class="admin-page">
+  <header class="admin-page-header">
+    <h1>Categorías</h1>
+    <p class="admin-page-lead muted">
+      Organiza el catálogo de libros. Pulsa «Editar» en una fila para cambiar el nombre.
+    </p>
+  </header>
+
+  <section class="admin-card">
+    <h2 class="admin-card-title">Nueva categoría</h2>
+    <form class="admin-inline-form" (ngSubmit)="create()">
+      <label class="admin-filter admin-filter--grow">
+        Nombre
+        <input
+          [(ngModel)]="newName"
+          name="newCat"
+          placeholder="Ej. Familia, Salud…"
+          autocomplete="off"
+          [disabled]="creating()"
+        />
+      </label>
+      <button type="submit" class="btn-primary" [disabled]="creating() || !newName.trim()">
+        {{ creating() ? 'Añadiendo…' : 'Añadir' }}
+      </button>
+    </form>
+    @if (createMsg(); as m) {
+      <p class="admin-feedback muted">{{ m }}</p>
+    }
+    @if (createErr(); as ce) {
+      <p class="admin-feedback err">{{ ce }}</p>
+    }
+
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando categorías…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else if (rows().length === 0) {
+      <p class="admin-empty muted">Sin categorías. Añade la primera arriba.</p>
+    } @else {
+      <div class="admin-toolbar admin-toolbar--compact">
+        <span class="admin-toolbar-meta muted"
+          >{{ rows().length }} categoría{{ rows().length === 1 ? '' : 's' }}</span
+        >
+      </div>
+      @if (actionErr(); as ae) {
+        <p class="admin-feedback err">{{ ae }}</p>
+      }
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of rows(); track c.id) {
+              @if (editingId() === c.id) {
+                <tr class="admin-row-active">
+                  <td>
+                    <input
+                      class="admin-input-cell"
+                      [ngModel]="editName()"
+                      (ngModelChange)="editName.set($event)"
+                      name="editCat{{ c.id }}"
+                      placeholder="Nombre de la categoría"
+                      autocomplete="off"
+                      [disabled]="saving()"
+                    />
+                  </td>
+                  <td class="admin-actions-cell">
+                    <button
+                      type="button"
+                      class="btn-primary"
+                      [disabled]="saving() || !editName().trim() || !editDirty()"
+                      (click)="saveEdit()"
+                    >
+                      {{ saving() ? 'Guardando…' : 'Guardar' }}
+                    </button>
+                    <button type="button" class="btn-ghost" [disabled]="saving()" (click)="cancelEdit()">
+                      Cancelar
+                    </button>
+                  </td>
+                </tr>
+                @if (saveErr(); as se) {
+                  <tr class="admin-row-feedback">
+                    <td colspan="2">
+                      <p class="admin-feedback err">{{ se }}</p>
+                    </td>
+                  </tr>
+                }
+              } @else {
+                <tr>
+                  <td><strong>{{ c.name }}</strong></td>
+                  <td class="admin-actions-cell">
+                    <button type="button" class="admin-link" [disabled]="rowBusy(c.id)" (click)="startEdit(c)">
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-ghost btn-ghost--danger"
+                      [disabled]="rowBusy(c.id)"
+                      (click)="remove(c)"
+                    >
+                      {{ deletingId() === c.id ? 'Eliminando…' : 'Eliminar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

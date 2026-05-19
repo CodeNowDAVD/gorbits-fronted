@@ -1,0 +1,57 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="carga" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--carga">Carga</span>
+      <h1>Movimientos de inventario</h1>
+      <p class="focus-page-subtitle">Historial de entradas, salidas y traslados de stock.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else if (rows().length === 0) {
+    <section class="focus-table-panel">
+      <p class="focus-table-empty">Sin movimientos registrados.</p>
+    </section>
+  } @else {
+    <section class="focus-table-panel">
+      <h2 class="focus-table-panel-title">Historial</h2>
+      <div class="table-scroll focus-table-scroll">
+        <table class="data-table data-table--numeric data-table--movements">
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Libro</th>
+              <th scope="col">Tipo</th>
+              <th scope="col" class="col-num">Δ total</th>
+              <th scope="col" class="col-num">Almacén</th>
+              <th scope="col" class="col-num">Campo</th>
+              <th scope="col">Referencia</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of rows(); track m.id) {
+              <tr>
+                <td>{{ formatDateTime(m.occurredAt) }}</td>
+                <td>{{ m.bookTitle }}</td>
+                <td>
+                  <span class="focus-badge focus-badge--muted">{{ movementLabel(m.movementType) }}</span>
+                </td>
+                <td class="col-num" [class.col-num--neg]="m.quantityDelta < 0" [class.col-num--pos]="m.quantityDelta > 0">
+                  {{ m.quantityDelta > 0 ? '+' : '' }}{{ m.quantityDelta }}
+                </td>
+                <td class="col-num">{{ m.warehouseDelta }}</td>
+                <td class="col-num">{{ m.fieldDelta }}</td>
+                <td class="focus-table-ref">{{ m.referenceType }} #{{ m.referenceId }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

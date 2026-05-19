@@ -1,0 +1,19 @@
+<section class="home-panel">
+  @if (auth.session(); as u) {
+    <p class="greeting">Hola, <strong>{{ u.username }}</strong></p>
+    <dl>
+      <div><dt>Rol</dt><dd>{{ u.role }}</dd></div>
+      <div><dt>ID</dt><dd>{{ u.id }}</dd></div>
+    </dl>
+    <p class="hint">
+      @if (u.role === 'ADMIN') {
+        Gestiona usuarios, libros, categorías y almacén desde Administración.
+      } @else if (u.role === 'PROVEEDOR') {
+        Tu trabajo operativo está en <strong>Proveedor</strong> (inventario, librería, clientes, guías).
+        También puedes consultar el <strong>Catálogo</strong>.
+      } @else {
+        Consulta el <strong>Catálogo</strong> según los permisos de tu rol.
+      }
+    </p>
+  }
+</section>

@@ -1,0 +1,144 @@
+<div class="admin-page">
+  <header class="admin-page-header">
+    <h1>Usuarios</h1>
+    <p class="admin-page-lead muted">
+      Roles, contraseñas y estado de cuentas. El perfil personal (nombre, DNI, etc.) se edita en
+      <a routerLink="/admin/proveedores" class="admin-link">Embajadores</a>.
+    </p>
+  </header>
+
+  @if (passwordModal(); as modal) {
+    <div class="admin-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pwd-modal-title">
+      <div class="admin-modal" (click)="$event.stopPropagation()">
+        @if (pwdModalSuccess(); as ok) {
+          <div class="admin-modal-success">
+            <div class="admin-modal-check" aria-hidden="true">✓</div>
+            <h2 id="pwd-modal-title">Contraseña establecida</h2>
+            <p class="admin-modal-lead">
+              El servidor confirmó el cambio para <strong>{{ ok.username }}</strong>.
+            </p>
+            <p class="muted">Comunícasela al usuario por un canal privado:</p>
+            <p class="admin-password-assigned">
+              <code>{{ ok.password }}</code>
+            </p>
+            <p class="admin-modal-hint muted">
+              Ya puede iniciar sesión en la pantalla de login con ese usuario y esta contraseña.
+            </p>
+            <button type="button" class="btn-primary admin-modal-btn" (click)="closePasswordModal()">
+              Listo
+            </button>
+          </div>
+        } @else {
+          <h2 id="pwd-modal-title">Nueva contraseña</h2>
+          <p class="admin-modal-lead muted">
+            Usuario: <strong>{{ modal.username }}</strong>
+          </p>
+          <form class="admin-modal-form" (ngSubmit)="submitPasswordModal($event)">
+            <label class="admin-modal-field">
+              Contraseña (mínimo 8 caracteres)
+              <input
+                [type]="showPwdPlain() ? 'text' : 'password'"
+                name="newPassword"
+                [(ngModel)]="pwdDraft"
+                autocomplete="new-password"
+                placeholder="Escribe la nueva contraseña"
+                [disabled]="pwdModalBusy()"
+              />
+            </label>
+            <label class="admin-modal-check-row">
+              <input
+                type="checkbox"
+                [checked]="showPwdPlain()"
+                (change)="showPwdPlain.set($any($event.target).checked)"
+              />
+              Mostrar contraseña
+            </label>
+            @if (pwdModalErr(); as err) {
+              <p class="admin-feedback err">{{ err }}</p>
+            }
+            <div class="admin-modal-actions">
+              <button type="submit" class="btn-primary" [disabled]="pwdModalBusy()">
+                {{ pwdModalBusy() ? 'Guardando en servidor…' : 'Asignar contraseña' }}
+              </button>
+              <button type="button" class="btn-ghost" [disabled]="pwdModalBusy()" (click)="closePasswordModal()">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+    </div>
+  }
+
+  <section class="admin-card">
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando usuarios…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else {
+      @if (roleOk(); as ro) {
+        <p class="admin-feedback admin-feedback--ok">{{ ro }}</p>
+      }
+      @if (roleErr(); as re) {
+        <p class="admin-feedback err">{{ re }}</p>
+      }
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of rows(); track u.id) {
+              <tr>
+                <td><strong>{{ u.username }}</strong></td>
+                <td>
+                  @if (currentUserId() !== null && u.id === currentUserId()) {
+                    <span class="admin-badge admin-badge--role">{{ roleLabel(u.role) }}</span>
+                  } @else {
+                    <select
+                      class="admin-select-cell"
+                      [value]="u.role"
+                      [disabled]="busyUserId() === u.id"
+                      (change)="changeRole(u, $event)"
+                    >
+                      <option value="ADMIN">Administrador</option>
+                      <option value="PROVEEDOR">Embajador</option>
+                    </select>
+                  }
+                </td>
+                <td>
+                  <span class="admin-badge" [class.admin-badge--ok]="u.enabled" [class.admin-badge--off]="!u.enabled">
+                    {{ u.enabled ? 'Activo' : 'Deshabilitado' }}
+                  </span>
+                </td>
+                <td class="admin-actions-cell">
+                  <button
+                    type="button"
+                    class="admin-link"
+                    [disabled]="busyUserId() === u.id"
+                    (click)="openPasswordModal(u)"
+                  >
+                    Contraseña
+                  </button>
+                  <button
+                    type="button"
+                    class="btn-ghost btn-compact"
+                    [disabled]="busyUserId() === u.id || (currentUserId() !== null && u.id === currentUserId())"
+                    (click)="toggleEnabled(u)"
+                  >
+                    {{ u.enabled ? 'Deshabilitar' : 'Habilitar' }}
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

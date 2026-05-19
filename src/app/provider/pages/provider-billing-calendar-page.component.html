@@ -1,0 +1,78 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="cobranza" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--cobranza">Cobranza</span>
+      <h1>Calendario de cuotas</h1>
+      <p class="focus-page-subtitle">Cuotas pendientes agrupadas por día de vencimiento.</p>
+    </div>
+  </header>
+
+  <section class="focus-toolbar">
+    <form class="focus-inline-form focus-inline-form--calendar" [formGroup]="form" (ngSubmit)="load()">
+      <label class="focus-field focus-field--date">
+        <span class="focus-field-label">Desde</span>
+        <input type="date" formControlName="from" />
+      </label>
+      <label class="focus-field focus-field--date">
+        <span class="focus-field-label">Hasta</span>
+        <input type="date" formControlName="to" />
+      </label>
+      <button type="submit" class="btn-primary focus-inline-form__btn focus-form-actions-btn" [disabled]="loading()">
+        {{ loading() ? 'Consultando…' : 'Consultar' }}
+      </button>
+    </form>
+  </section>
+
+  @if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  }
+
+  @if (!loading() && !error() && daysWithItems().length === 0) {
+    <p class="focus-table-message muted">No hay cuotas pendientes en el rango seleccionado.</p>
+  }
+
+  @for (day of daysWithItems(); track day.date) {
+    <section class="focus-table-panel focus-calendar-day">
+      <h2 class="focus-table-panel-title">
+        {{ day.date }}
+        <span class="focus-table-panel-badge">{{ day.pendingCount }} pendientes</span>
+      </h2>
+      <div class="table-scroll focus-table-scroll">
+        <table class="data-table data-table--numeric">
+          <thead>
+            <tr>
+              <th scope="col">Contrato</th>
+              <th scope="col">Cliente</th>
+              <th scope="col" class="col-seq">#</th>
+              <th scope="col">Vence</th>
+              <th scope="col" class="col-num">Importe</th>
+              <th scope="col" class="col-num">Pendiente</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (it of day.items; track it.installmentId + '-' + it.sequence) {
+              <tr>
+                <td>
+                  @if (it.guideId != null) {
+                    <a [routerLink]="['/proveedor/guias', it.guideId]" class="focus-table-link">{{
+                      it.contractNumber
+                    }}</a>
+                  } @else {
+                    {{ it.contractNumber }}
+                  }
+                </td>
+                <td>{{ it.clientName }}</td>
+                <td class="col-seq">{{ it.sequence }}</td>
+                <td>{{ it.dueDate }}</td>
+                <td class="col-num">{{ it.amount | number: '1.2-2' }}</td>
+                <td class="col-num">{{ it.remaining | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

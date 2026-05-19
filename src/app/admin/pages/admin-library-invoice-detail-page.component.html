@@ -1,0 +1,64 @@
+<div class="admin-page">
+  <header class="admin-page-header">
+    <a routerLink="/admin/facturas-libreria" class="admin-back-link">← Facturas</a>
+    @if (detail(); as inv) {
+      <h1>Factura {{ inv.invoiceNumber }}</h1>
+      <p class="admin-page-lead muted">Detalle de la remisión registrada.</p>
+    } @else {
+      <h1>Detalle de factura</h1>
+    }
+  </header>
+
+  <section class="admin-card">
+    @if (loading()) {
+      <p class="admin-loading muted">Cargando factura…</p>
+    } @else if (error(); as e) {
+      <p class="err admin-empty">{{ e }}</p>
+    } @else if (detail(); as inv) {
+      <dl class="admin-detail-grid">
+        <div class="admin-detail-item">
+          <dt>Propietario</dt>
+          <dd>{{ inv.ownerUsername }}</dd>
+        </div>
+        <div class="admin-detail-item">
+          <dt>Emisión</dt>
+          <dd>{{ inv.issuedOn }}</dd>
+        </div>
+        <div class="admin-detail-item">
+          <dt>Unidades</dt>
+          <dd>{{ inv.totalUnits }}</dd>
+        </div>
+        <div class="admin-detail-item">
+          <dt>Total</dt>
+          <dd>B {{ inv.totalAmount | number: '1.2-2' }}</dd>
+        </div>
+      </dl>
+
+      @if (inv.note) {
+        <p class="admin-note-box">{{ inv.note }}</p>
+      }
+
+      <h2 class="admin-section-title">Líneas</h2>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Libro</th>
+              <th class="col-num">Cant.</th>
+              <th class="col-num">Línea (B)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of inv.lines; track $index) {
+              <tr>
+                <td>{{ line.title }}</td>
+                <td class="col-num">{{ line.quantity }}</td>
+                <td class="col-num">{{ line.lineTotal | number: '1.2-2' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</div>

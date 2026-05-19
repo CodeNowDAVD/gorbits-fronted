@@ -1,0 +1,108 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="cobranza" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--cobranza">Cobranza</span>
+      <h1>Resumen y vencidas</h1>
+      <p class="focus-page-subtitle">Totales de cobro y cuotas con vencimiento pasado.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else {
+    <section class="focus-dashboard" aria-label="Resumen de cobranza">
+      <div class="focus-dashboard__filters">
+        <label class="focus-field focus-field--filter">
+          <span class="focus-field-label">Campaña</span>
+          <div class="focus-select-wrap">
+            <select
+              class="focus-select"
+              [(ngModel)]="selectedCampaignId"
+              (ngModelChange)="onCampaignChange()"
+              name="campaignPick"
+            >
+              <option [ngValue]="null">Todas las campañas</option>
+              @for (c of campaigns(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+        </label>
+      </div>
+
+      @if (summary(); as s) {
+        <ul class="focus-stat-row focus-stat-row--5" aria-label="Totales de cobranza">
+          <li>
+            <span class="focus-stat-row-label">A cobrar</span>
+            <span class="focus-stat-row-value">{{ s.totalToCollect | number: '1.2-2' }}</span>
+          </li>
+          <li>
+            <span class="focus-stat-row-label">Cobrado</span>
+            <span class="focus-stat-row-value">{{ s.totalCollected | number: '1.2-2' }}</span>
+          </li>
+          <li>
+            <span class="focus-stat-row-label">Pendiente</span>
+            <span class="focus-stat-row-value">{{ s.totalPending | number: '1.2-2' }}</span>
+          </li>
+          <li>
+            <span class="focus-stat-row-label">Cuotas pendientes</span>
+            <span class="focus-stat-row-value">{{ s.pendingInstallmentCount }}</span>
+          </li>
+          <li>
+            <span class="focus-stat-row-label">Cuotas vencidas</span>
+            <span
+              class="focus-stat-row-value"
+              [class.focus-stat-row-value--alert]="s.pastDueInstallmentCount > 0"
+            >
+              {{ s.pastDueInstallmentCount }}
+            </span>
+          </li>
+        </ul>
+      }
+
+      <div class="focus-dashboard__section">
+        <h2 class="focus-dashboard__title">Cuotas vencidas</h2>
+        @if (pastDue().length === 0) {
+          <p class="focus-table-empty">Sin cuotas vencidas con el filtro actual.</p>
+        } @else {
+          <div class="table-scroll focus-table-scroll">
+            <table class="data-table data-table--numeric data-table--collections">
+              <thead>
+                <tr>
+                  <th scope="col">Contrato</th>
+                  <th scope="col">Cliente</th>
+                  <th scope="col" class="col-seq">Cuota</th>
+                  <th scope="col">Vence</th>
+                  <th scope="col" class="col-num">Pendiente</th>
+                  <th scope="col" class="col-days">Días</th>
+                  <th scope="col" class="col-act"></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of pastDue(); track row.installmentId) {
+                  <tr>
+                    <td>{{ row.contractNumber }}</td>
+                    <td>{{ row.clientName }}</td>
+                    <td class="col-seq">#{{ row.installmentSeq }}</td>
+                    <td>{{ row.dueDate }}</td>
+                    <td class="col-num">{{ row.pendingAmount | number: '1.2-2' }}</td>
+                    <td class="col-days">
+                      <span class="focus-badge focus-badge--alert">{{ row.daysPastDue }}</span>
+                    </td>
+                    <td class="col-act">
+                      <a [routerLink]="['/proveedor/guias', row.guideId]" class="focus-table-link">Ver contrato</a>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </section>
+  }
+</div>

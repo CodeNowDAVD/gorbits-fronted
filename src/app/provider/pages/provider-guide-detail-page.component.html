@@ -1,0 +1,407 @@
+<div class="focus-page focus-page--detail focus-page--contract focus-page--modo-section">
+  <app-provider-modo-nav mode="campo" backLink="/proveedor/guias" backLabel="← Contratos" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    @if (loading()) {
+      <p class="focus-table-message muted">Cargando…</p>
+    } @else if (error(); as e) {
+      <p class="focus-table-message err">{{ e }}</p>
+    }
+  </header>
+
+  @if (!loading() && !error() && guide(); as g) {
+    @if (actionError(); as ae) {
+      <p class="focus-form-error focus-contract-alert" role="alert">{{ ae }}</p>
+    }
+
+    <section class="focus-contract-summary" aria-labelledby="contract-summary-heading">
+      <div class="focus-contract-summary__head">
+        <div class="focus-contract-summary__title-block">
+          <span class="focus-work-eyebrow focus-work-eyebrow--campo">Campo</span>
+          <h1 id="contract-summary-heading">Contrato {{ g.contractNumber }}</h1>
+          <p class="focus-contract-summary__ref">Guía interna #{{ g.id }}</p>
+        </div>
+        <span class="focus-badge focus-contract-status" [ngClass]="statusBadgeClass(g.status)">
+          {{ statusLabel(g.status) }}
+        </span>
+      </div>
+
+      @if (!isReadOnly(g)) {
+        <div class="focus-contract-status-bar" [formGroup]="statusForm">
+          <label class="focus-contract-status-bar__field">
+            <span class="focus-field-label">Estado del contrato</span>
+            <div class="focus-select-wrap">
+              <select formControlName="status" class="focus-select" (change)="onStatusChange()">
+                <option value="ACTIVA">Activa</option>
+                <option value="CERRADA">Cerrada</option>
+              </select>
+            </div>
+          </label>
+          @if (statusSaving()) {
+            <span class="focus-contract-status-bar__hint">Guardando…</span>
+          } @else {
+            <span class="focus-contract-status-bar__hint">La devolución se registra más abajo.</span>
+          }
+        </div>
+      }
+
+      @if (isReadOnly(g)) {
+        <p class="focus-contract-readonly" role="status">
+          Contrato devuelto: solo consulta. Los abonos ya registrados se conservan; no se pueden registrar pagos
+          nuevos ni modificar cuotas.
+        </p>
+      }
+
+      <dl class="focus-contract-facts">
+        <div class="focus-contract-fact focus-contract-fact--highlight">
+          <dt>Total</dt>
+          <dd>{{ g.totalAmount | number: '1.2-2' }}</dd>
+        </div>
+        <div class="focus-contract-fact">
+          <dt>Cliente</dt>
+          <dd>{{ g.clientName }}</dd>
+        </div>
+        <div class="focus-contract-fact">
+          <dt>Campaña</dt>
+          <dd>{{ g.campaignName }}</dd>
+        </div>
+        <div class="focus-contract-fact">
+          <dt>Pedido</dt>
+          <dd>{{ g.orderDate }}</dd>
+        </div>
+        @if (installments().length > 0) {
+          <div class="focus-contract-fact">
+            <dt>Cobrado</dt>
+            <dd>{{ billingPaidTotal() | number: '1.2-2' }}</dd>
+          </div>
+          <div class="focus-contract-fact">
+            <dt>Pendiente</dt>
+            <dd class="focus-contract-fact__pending">{{ billingPendingTotal() | number: '1.2-2' }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (g.tags.length) {
+        <ul class="focus-contract-tags" aria-label="Etiquetas">
+          @for (tag of g.tags; track tag) {
+            <li>{{ tag }}</li>
+          }
+        </ul>
+      }
+
+      @if (g.note) {
+        <p class="focus-contract-note">{{ g.note }}</p>
+      }
+    </section>
+
+    @if (billingErr(); as be) {
+      <p class="focus-form-error focus-contract-alert" role="alert">{{ be }}</p>
+    }
+    @if (billingNotice(); as bn) {
+      <p class="focus-form-notice focus-contract-alert" role="status">{{ bn }}</p>
+    }
+
+    <div class="focus-contract-stack">
+      <section class="focus-contract-card focus-contract-card--table" aria-labelledby="contract-lines-heading">
+        <h2 id="contract-lines-heading" class="focus-contract-card__title">Libros del contrato</h2>
+        <p class="focus-contract-card__lead">{{ g.lines.length }} línea{{ g.lines.length === 1 ? '' : 's' }}</p>
+        <div class="table-scroll focus-table-scroll">
+          <table class="data-table data-table--numeric">
+            <thead>
+              <tr>
+                <th scope="col">Libro</th>
+                <th scope="col" class="col-num">Uds.</th>
+                <th scope="col" class="col-num">P. unit.</th>
+                <th scope="col" class="col-num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of g.lines; track line.id) {
+                <tr>
+                  <td>{{ line.bookTitle }}</td>
+                  <td class="col-num">{{ line.quantity }}</td>
+                  <td class="col-num">{{ line.unitPrice | number: '1.2-2' }}</td>
+                  <td class="col-num">{{ line.lineTotal | number: '1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="focus-contract-lines-total">
+                <th scope="row" colspan="3">Total contrato</th>
+                <td class="col-num">{{ g.totalAmount | number: '1.2-2' }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      @if (installments().length > 0) {
+        <section class="focus-contract-card" aria-labelledby="contract-installments-heading">
+          <h2 id="contract-installments-heading" class="focus-contract-card__title">Cuotas</h2>
+          <p class="focus-contract-card__lead">
+            {{ installments().length }} cuota{{ installments().length === 1 ? '' : 's' }} · pendiente
+            {{ billingPendingTotal() | number: '1.2-2' }}
+          </p>
+          <ul class="focus-installment-list">
+            @for (q of installments(); track q.id) {
+              <li class="focus-installment-card" [class.focus-installment-card--paid]="q.fullyPaid">
+                <div class="focus-installment-card__head">
+                  <span class="focus-installment-card__seq">Cuota #{{ q.sequence }}</span>
+                  @if (q.fullyPaid) {
+                    <span class="focus-badge focus-badge--ok">Pagada</span>
+                  } @else {
+                    <span class="focus-badge focus-badge--muted">Pendiente</span>
+                  }
+                </div>
+                <dl class="focus-installment-card__facts">
+                  <div>
+                    <dt>Vence</dt>
+                    <dd>{{ q.dueDate }}</dd>
+                  </div>
+                  <div>
+                    <dt>Importe</dt>
+                    <dd>{{ q.amount | number: '1.2-2' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Pagado</dt>
+                    <dd>{{ q.paidTotal | number: '1.2-2' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Pendiente</dt>
+                    <dd>{{ q.remaining | number: '1.2-2' }}</dd>
+                  </div>
+                </dl>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @if (!isReadOnly(g)) {
+        @if (installments().length === 0) {
+          <section class="focus-contract-card focus-contract-card--action" aria-labelledby="contract-plan-heading">
+            @if (!planPanelOpen()) {
+              <div class="focus-panel-trigger">
+                <div class="focus-panel-trigger__copy">
+                  <h2 id="contract-plan-heading" class="focus-contract-card__title">Plan de cuotas</h2>
+                  <p class="focus-contract-card__lead">Define fechas e importes antes de cobrar.</p>
+                </div>
+                <button type="button" class="btn-ghost focus-panel-trigger__btn" (click)="openPlanPanel()">
+                  Crear plan
+                </button>
+              </div>
+            } @else {
+              <div class="focus-panel-trigger focus-panel-trigger--open">
+                <h2 class="focus-contract-card__title">Crear plan de cuotas</h2>
+                <button type="button" class="btn-ghost focus-panel-trigger__close" (click)="closePlanPanel()">
+                  Cancelar
+                </button>
+              </div>
+              <form [formGroup]="customPlanForm" (ngSubmit)="submitCustomPlan()" class="focus-panel-form">
+                <p class="focus-form-section-lead">
+                  Agregá todas las cuotas que necesites (fecha de vencimiento e importe de cada una).
+                </p>
+                <div class="focus-installment-rows" formArrayName="items">
+                  @for (_row of customItems.controls; track $index; let i = $index) {
+                    <div class="focus-installment-row" [formGroupName]="i">
+                      <label class="focus-field focus-field--date">
+                        <span class="focus-field-label">Vencimiento</span>
+                        <input type="date" formControlName="dueDate" />
+                      </label>
+                      <label class="focus-field focus-field--amount">
+                        <span class="focus-field-label">Importe</span>
+                        <input type="number" step="0.01" min="0.01" formControlName="amount" placeholder="0.00" />
+                      </label>
+                      @if (customItems.length > 1) {
+                        <button type="button" class="btn-ghost focus-btn-remove-line" (click)="removeCustomRow(i)">
+                          Quitar
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+                <button type="button" class="btn-ghost focus-btn-add-line" (click)="addCustomRow()">
+                  <span aria-hidden="true">+</span> Añadir cuota
+                </button>
+                <div class="focus-form-section-actions">
+                  <button type="submit" class="btn-primary" [disabled]="billingBusy()">Confirmar plan</button>
+                </div>
+              </form>
+            }
+          </section>
+        } @else if (pendingInstallments().length > 0) {
+          <section class="focus-contract-card focus-contract-card--action" aria-labelledby="contract-payment-heading">
+            @if (!paymentPanelOpen()) {
+              <div class="focus-panel-trigger">
+                <div class="focus-panel-trigger__copy">
+                  <h2 id="contract-payment-heading" class="focus-contract-card__title">Registrar abono</h2>
+                  <p class="focus-contract-card__lead">Aplica un pago a una cuota pendiente.</p>
+                </div>
+                <button type="button" class="btn-ghost focus-panel-trigger__btn" (click)="openPaymentPanel()">
+                  Registrar abono
+                </button>
+              </div>
+            } @else {
+              <div class="focus-panel-trigger focus-panel-trigger--open">
+                <h2 class="focus-contract-card__title">Registrar abono</h2>
+                <button type="button" class="btn-ghost focus-panel-trigger__close" (click)="closePaymentPanel()">
+                  Cancelar
+                </button>
+              </div>
+              <form class="focus-panel-form focus-contract-action-form" [formGroup]="payForm" (ngSubmit)="submitPayment()">
+                <label class="focus-field">
+                  <span class="focus-field-label">Cuota</span>
+                  <div class="focus-select-wrap">
+                    <select formControlName="installmentId" class="focus-select">
+                      <option [ngValue]="null">Seleccionar cuota…</option>
+                      @for (q of pendingInstallments(); track q.id) {
+                        <option [ngValue]="q.id">
+                          #{{ q.sequence }} · pendiente {{ q.remaining | number: '1.2-2' }}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                </label>
+                <label class="focus-field">
+                  <span class="focus-field-label">Importe</span>
+                  <input type="number" step="0.01" min="0.01" formControlName="amount" placeholder="0.00" />
+                </label>
+                <label class="focus-field">
+                  <span class="focus-field-label">Fecha de pago</span>
+                  <input type="date" formControlName="paidOn" />
+                </label>
+                <label class="focus-field">
+                  <span class="focus-field-label">Nota <span class="focus-field-optional">(opcional)</span></span>
+                  <input formControlName="note" placeholder="Referencia o comentario" />
+                </label>
+                <div class="focus-form-section-actions">
+                  <button type="submit" class="btn-primary" [disabled]="billingBusy()">Confirmar pago</button>
+                </div>
+              </form>
+            }
+          </section>
+        }
+
+        @if (installments().length > 0) {
+          <section class="focus-contract-card focus-contract-card--action" aria-labelledby="contract-reschedule-heading">
+            @if (!reschedulePanelOpen()) {
+              <div class="focus-panel-trigger">
+                <div class="focus-panel-trigger__copy">
+                  <h2 id="contract-reschedule-heading" class="focus-contract-card__title">Reprogramar vencimiento</h2>
+                  <p class="focus-contract-card__lead">Cambia la fecha de una cuota existente.</p>
+                </div>
+                <button type="button" class="btn-ghost focus-panel-trigger__btn" (click)="openReschedulePanel()">
+                  Reprogramar
+                </button>
+              </div>
+            } @else {
+              <div class="focus-panel-trigger focus-panel-trigger--open">
+                <h2 class="focus-contract-card__title">Reprogramar vencimiento</h2>
+                <button type="button" class="btn-ghost focus-panel-trigger__close" (click)="closeReschedulePanel()">
+                  Cancelar
+                </button>
+              </div>
+              <form
+                class="focus-panel-form focus-contract-action-form"
+                [formGroup]="rescheduleForm"
+                (ngSubmit)="submitReschedule()"
+              >
+                <label class="focus-field">
+                  <span class="focus-field-label">Cuota</span>
+                  <div class="focus-select-wrap">
+                    <select formControlName="installmentId" class="focus-select" (change)="loadRescheduleHistory()">
+                      <option [ngValue]="null">Seleccionar cuota…</option>
+                      @for (q of installments(); track q.id) {
+                        <option [ngValue]="q.id">#{{ q.sequence }} ({{ q.dueDate }})</option>
+                      }
+                    </select>
+                  </div>
+                </label>
+                <label class="focus-field">
+                  <span class="focus-field-label">Nuevo vencimiento</span>
+                  <input type="date" formControlName="dueDate" />
+                </label>
+                <div class="focus-form-section-actions">
+                  <button type="submit" class="btn-primary" [disabled]="billingBusy()">Guardar fecha</button>
+                </div>
+                @if (rescheduleHistory().length > 0) {
+                  <div class="focus-subtable-wrap">
+                    <h3 class="focus-subtable-title">Historial de cambios</h3>
+                    <ul class="focus-reschedule-history">
+                      @for (h of rescheduleHistory(); track h.id) {
+                        <li>
+                          <span>{{ h.previousDueDate }} → {{ h.newDueDate }}</span>
+                          <span class="focus-reschedule-history__when">{{ formatDateTime(h.rescheduledAt) }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </form>
+            }
+          </section>
+        }
+
+        @if (!g.clientReturn) {
+          <section class="focus-contract-card focus-contract-card--action" aria-labelledby="contract-return-heading">
+            @if (!returnPanelOpen()) {
+              <div class="focus-panel-trigger">
+                <div class="focus-panel-trigger__copy">
+                  <h2 id="contract-return-heading" class="focus-contract-card__title">Devolución del cliente</h2>
+                  <p class="focus-contract-card__lead">
+                    Registra la devolución solo cuando el cliente entrega el contrato.
+                  </p>
+                </div>
+                <button type="button" class="btn-ghost focus-panel-trigger__btn" (click)="openReturnPanel()">
+                  Registrar devolución
+                </button>
+              </div>
+            } @else {
+              <div class="focus-panel-trigger focus-panel-trigger--open">
+                <h2 class="focus-contract-card__title">Registrar devolución</h2>
+                <button type="button" class="btn-ghost focus-panel-trigger__close" (click)="closeReturnPanel()">
+                  Cancelar
+                </button>
+              </div>
+              <form
+                class="focus-form-grid focus-form-grid--return focus-panel-form"
+                [formGroup]="returnForm"
+                (ngSubmit)="submitReturn()"
+              >
+                <label class="focus-field">
+                  <span class="focus-field-label">Motivo</span>
+                  <input formControlName="reason" placeholder="Describe el motivo" />
+                </label>
+                <label class="focus-field">
+                  <span class="focus-field-label"
+                    >Fecha y hora <span class="focus-field-optional">(opcional)</span></span
+                  >
+                  <input type="datetime-local" formControlName="returnedAt" />
+                </label>
+                <fieldset class="focus-check-group">
+                  <legend class="focus-check-group__legend">Opciones</legend>
+                  <label class="focus-check-item">
+                    <input type="checkbox" formControlName="restoreStockToField" />
+                    <span>Liberar unidades al stock disponible</span>
+                  </label>
+                  <label class="focus-check-item">
+                    <input type="checkbox" formControlName="hideFromReturnList" />
+                    <span>Ocultar del listado de devoluciones</span>
+                  </label>
+                </fieldset>
+                <div class="focus-form-section-actions">
+                  <button type="submit" class="btn-primary" [disabled]="busy()">Confirmar devolución</button>
+                </div>
+              </form>
+            }
+          </section>
+        }
+      } @else if (g.clientReturn; as cr) {
+        <section class="focus-contract-card focus-contract-card--muted" aria-labelledby="contract-return-done-heading">
+          <h2 id="contract-return-done-heading" class="focus-contract-card__title">Devolución registrada</h2>
+          <p class="focus-detail-return">{{ cr.returnedAt }} · {{ cr.reason }}</p>
+        </section>
+      }
+    </div>
+  }
+</div>

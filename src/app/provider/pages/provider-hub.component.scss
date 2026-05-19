@@ -1,0 +1,58 @@
+.pv-page-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--pv-text, #111827);
+}
+
+.pv-page-lede {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+  max-width: 36rem;
+  line-height: 1.5;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 0.6rem;
+}
+
+.hub-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--pv-radius-sm, 8px);
+  border: 1px solid var(--pv-border, #e5e7eb);
+  background: var(--pv-surface, #ffffff);
+  color: var(--pv-text, #111827);
+  text-decoration: none;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease;
+
+  span {
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+
+  small {
+    color: var(--pv-muted, #6b7280);
+    font-size: 0.78rem;
+    line-height: 1.35;
+    font-weight: 400;
+  }
+
+  &:hover {
+    border-color: var(--pv-border-strong, #d1d5db);
+    background: var(--pv-fill-hover, #f3f4f6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--pv-accent, #0b3487);
+    outline-offset: 2px;
+  }
+}

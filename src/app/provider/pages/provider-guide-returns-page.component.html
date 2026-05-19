@@ -1,0 +1,61 @@
+<div class="focus-page focus-page--modo-section">
+  <app-provider-modo-nav mode="campo" />
+
+  <header class="focus-work-header">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--campo">Trabajo · Campo</span>
+      <h1>Devoluciones de guías</h1>
+      <p class="focus-page-subtitle">Contratos devueltos por clientes y visibilidad en el listado.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-table-message err">{{ e }}</p>
+  } @else if (rows().length === 0) {
+    <p class="focus-table-message muted">Sin devoluciones registradas.</p>
+  } @else {
+    <section class="focus-table-panel">
+      <label class="focus-table-panel-toolbar">
+        <input type="checkbox" [(ngModel)]="includeHidden" (change)="reload()" />
+        Incluir ocultas del listado
+      </label>
+
+      <div class="table-scroll focus-table-scroll">
+        <table class="data-table data-table--returns">
+          <thead>
+            <tr>
+              <th scope="col" class="col-guide">Guía</th>
+              <th scope="col" class="col-client">Cliente</th>
+              <th scope="col" class="col-campaign">Campaña</th>
+              <th scope="col" class="col-date">Fecha devolución</th>
+              <th scope="col" class="col-reason">Motivo</th>
+              <th scope="col" class="col-flag">En listado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of rows(); track r.guideId + '-' + r.returnedAt) {
+              <tr>
+                <td class="col-guide">
+                  <a [routerLink]="['/proveedor/guias', r.guideId]">{{ r.guideId }}</a>
+                </td>
+                <td class="col-client">{{ r.clientName }}</td>
+                <td class="col-campaign">{{ r.campaignName }}</td>
+                <td class="col-date">{{ formatDateTime(r.returnedAt) }}</td>
+                <td class="col-reason">{{ r.reason }}</td>
+                <td class="col-flag">
+                  @if (r.hiddenFromReturnList) {
+                    <span class="focus-badge focus-badge--muted">Oculta</span>
+                  } @else {
+                    <span class="focus-badge focus-badge--ok">Visible</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

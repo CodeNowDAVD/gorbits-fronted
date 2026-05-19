@@ -1,0 +1,103 @@
+<div class="focus-page focus-page--hub focus-page--modo-section">
+  <app-provider-modo-nav mode="campo" />
+
+  <header class="focus-work-header focus-work-header--stacked">
+    <div class="focus-work-header-text">
+      <span class="focus-work-eyebrow focus-work-eyebrow--campo">Trabajo · Campo</span>
+      <h1>Contratos de venta</h1>
+      <p class="focus-page-subtitle">Listado de guías y contratos activos de tu zona.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="focus-table-message muted">Cargando…</p>
+  } @else if (error(); as e) {
+    <p class="focus-form-error" role="alert">{{ e }}</p>
+  } @else {
+    <section class="focus-table-panel">
+      <div class="focus-table-toolbar">
+        <label class="focus-field focus-table-toolbar__search">
+          <span class="focus-field-label">Buscar</span>
+          <input
+            type="search"
+            class="focus-search-input"
+            [value]="searchQuery()"
+            (input)="onSearchInput($any($event.target).value)"
+            placeholder="Número de contrato…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </label>
+        @if (tags().length) {
+          <label class="focus-field focus-field--filter focus-table-toolbar__filter">
+            <span class="focus-field-label">Etiqueta</span>
+            <div class="focus-select-wrap">
+              <select
+                class="focus-select"
+                [(ngModel)]="filterTagId"
+                (ngModelChange)="onFilterChange()"
+                name="tagFilter"
+              >
+                <option [ngValue]="null">Todas</option>
+                @for (t of tags(); track t.id) {
+                  <option [ngValue]="t.id">{{ t.name }}</option>
+                }
+              </select>
+            </div>
+          </label>
+        }
+        @if (guides().length > 0 || searchQuery().trim()) {
+          <p class="focus-table-toolbar__meta">
+            @if (searching()) {
+              Buscando…
+            } @else {
+              {{ guides().length }} contrato{{ guides().length === 1 ? '' : 's' }}
+            }
+          </p>
+        }
+        <div class="focus-table-toolbar__actions">
+          <a routerLink="/proveedor/guias/nueva" class="btn-primary focus-form-actions-btn">Nuevo contrato</a>
+        </div>
+      </div>
+
+      @if (guides().length === 0) {
+        @if (searchQuery().trim()) {
+          <p class="focus-table-empty">Ningún contrato coincide con «{{ searchQuery().trim() }}».</p>
+        } @else {
+          <p class="focus-table-empty">Sin contratos registrados.</p>
+        }
+      } @else {
+        <div class="table-scroll focus-table-scroll" [class.focus-table-scroll--loading]="searching()">
+          <table class="data-table data-table--guides">
+            <thead>
+              <tr>
+                <th scope="col">Contrato</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Campaña</th>
+                <th scope="col">Pedido</th>
+                <th scope="col">Etiquetas</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="col-act"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (g of guides(); track g.id) {
+                <tr>
+                  <td>{{ g.contractNumber }}</td>
+                  <td>{{ g.clientName }}</td>
+                  <td>{{ g.campaignName }}</td>
+                  <td>{{ g.orderDate }}</td>
+                  <td>{{ g.tags.length ? g.tags.join(', ') : '—' }}</td>
+                  <td>{{ g.status }}</td>
+                  <td class="col-act">
+                    <a [routerLink]="['/proveedor/guias', g.id]" class="focus-table-link">Abrir</a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</div>
