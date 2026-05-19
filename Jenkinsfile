@@ -1,6 +1,6 @@
 /**
  * Pipeline CI/CD — GOrbitSF (Frontend).
- * Clone → Install → Test (cobertura) → Sonar → Build → Deploy Termux.
+ * Clone → Install → Test (cobertura) → Sonar → Build → Deploy HTTP.
  */
 pipeline {
     agent any
@@ -11,10 +11,7 @@ pipeline {
 
     parameters {
         booleanParam(name: 'DEPLOY_TO_SERVER', defaultValue: false,
-            description: 'Si true, despliega a Termux (tar + scp + deploy.sh)')
-        string(name: 'TERMUX_HOST', defaultValue: '192.168.2.4', description: 'IP Termux')
-        string(name: 'TERMUX_USER', defaultValue: 'u0_a296', description: 'Usuario SSH')
-        string(name: 'TERMUX_PORT', defaultValue: '8022', description: 'Puerto SSH')
+            description: 'Si true, POST tar.gz a https://app.gorbits.xyz/deploy (Bearer)')
     }
 
     environment {
@@ -22,8 +19,9 @@ pipeline {
         SONAR_HOST_URL = 'http://sonarqube:9000'
         GIT_REPO_URL   = "${env.GIT_REPO_URL ?: 'https://github.com/CodeNowDAVD/gorbits-fronted.git'}"
         DIST_DIR       = 'dist/gorbitsf/browser'
-        FRONTEND_URL   = "http://${params.TERMUX_HOST}:8088"
-        HEALTH_URL     = "http://${params.TERMUX_HOST}:8088/api/actuator/health"
+        DEPLOY_URL     = 'https://app.gorbits.xyz/deploy'
+        FRONTEND_URL   = 'https://app.gorbits.xyz'
+        HEALTH_URL     = 'https://app.gorbits.xyz/api/actuator/health'
     }
 
     stages {
@@ -84,13 +82,17 @@ pipeline {
             }
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
-                    sh """
-                        export TERMUX_HOST='${params.TERMUX_HOST}'
-                        export TERMUX_USER='${params.TERMUX_USER}'
-                        export TERMUX_PORT='${params.TERMUX_PORT}'
-                        chmod +x ci/deploy-frontend-termux.sh
-                        ./ci/deploy-frontend-termux.sh
-                    """
+                    withCredentials([string(
+                        credentialsId: 'gorbits-deploy-token',
+                        variable: 'DEPLOY_TOKEN')]) {
+                        sh '''
+                            chmod +x ci/deploy-http-gorbits.sh
+                            export DEPLOY_URL="${DEPLOY_URL}"
+                            export HEALTH_URL="${HEALTH_URL}"
+                            export FRONTEND_URL="${FRONTEND_URL}"
+                            ./ci/deploy-http-gorbits.sh
+                        '''
+                    }
                 }
             }
         }
@@ -107,7 +109,7 @@ pipeline {
             }
         }
         failure {
-            echo 'Revisar npm, tests, Sonar, build o deploy SSH.'
+            echo 'Revisar npm, tests, Sonar, build o deploy HTTP (/deploy).'
         }
         always {
             archiveArtifacts artifacts: 'dist/gorbitsf/browser/**,coverage/gorbitsf/**',
