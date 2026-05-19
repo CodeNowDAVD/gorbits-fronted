@@ -87,9 +87,6 @@ pipeline {
                         variable: 'DEPLOY_TOKEN')]) {
                         sh '''
                             chmod +x ci/deploy-http-gorbits.sh
-                            export DEPLOY_URL="${DEPLOY_URL}"
-                            export HEALTH_URL="${HEALTH_URL}"
-                            export FRONTEND_URL="${FRONTEND_URL}"
                             ./ci/deploy-http-gorbits.sh
                         '''
                     }
