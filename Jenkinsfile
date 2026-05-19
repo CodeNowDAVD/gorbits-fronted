@@ -7,7 +7,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NODE_HOME'
+        nodejs 'NodeJS 22'   // mismo nombre que en Manage Jenkins → Tools
     }
 
     parameters {
@@ -83,13 +83,13 @@ pipeline {
             }
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
-                    sh '''
-                        export TERMUX_HOST="${params.TERMUX_HOST}"
-                        export TERMUX_USER="${params.TERMUX_USER}"
-                        export TERMUX_PORT="${params.TERMUX_PORT}"
+                    sh """
+                        export TERMUX_HOST='${params.TERMUX_HOST}'
+                        export TERMUX_USER='${params.TERMUX_USER}'
+                        export TERMUX_PORT='${params.TERMUX_PORT}'
                         chmod +x ci/deploy-frontend-termux.sh
                         ./ci/deploy-frontend-termux.sh
-                    '''
+                    """
                 }
             }
         }
@@ -97,10 +97,12 @@ pipeline {
 
     post {
         success {
-            echo "Build OK → ${DIST_DIR}"
-            if (params.DEPLOY_TO_SERVER) {
-                echo "App → ${FRONTEND_URL}/login"
-                echo "Health → ${HEALTH_URL}"
+            script {
+                echo "Build OK → ${DIST_DIR}"
+                if (params.DEPLOY_TO_SERVER) {
+                    echo "App → ${FRONTEND_URL}/login"
+                    echo "Health → ${HEALTH_URL}"
+                }
             }
         }
         failure {
